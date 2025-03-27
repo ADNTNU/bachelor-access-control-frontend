@@ -1,7 +1,8 @@
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { Roboto, Inter } from 'next/font/google';
-import { ThemeProvider } from '@mui/material/styles';
-import theme from '@material/theme';
+// import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
+// import { ThemeProvider } from '@mui/material/styles';
+// import theme from '@material/theme';
 
 import { type Metadata } from "next";
 
@@ -32,9 +33,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
        <body className={`${inter.variable} ${roboto.variable}`} style={{ fontFamily: 'var(--font-inter)', margin: 0 }}>
         <AppRouterCacheProvider>
-          <ThemeProvider theme={theme}>
+          {/* <ThemeProvider theme={theme}> */}
+            {/* <InitColorSchemeScript attribute="data-color-scheme" /> */}
             {children}
-          </ThemeProvider>
+          {/* </ThemeProvider> */}
         </AppRouterCacheProvider>
        </body>
     </html>
