@@ -8,7 +8,8 @@ const theme = createTheme({
     dark: true,
   },
   typography: {
-    fontFamily: 'var(--font-roboto)',
+    // fontFamily: 'var(--font-roboto)',
+    fontFamily: 'var(--font-inter)',
   },
 });
 

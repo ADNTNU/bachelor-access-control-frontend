@@ -1,5 +1,5 @@
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-import { Roboto } from 'next/font/google';
+import { Roboto, Inter } from 'next/font/google';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from '@material/theme';
 
@@ -12,6 +12,12 @@ const roboto = Roboto({
   variable: '--font-roboto',
 });
 
+const inter = Inter({
+  weight: ['300', '400', '500', '700'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "Access control",
@@ -23,8 +29,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-       <body className={roboto.variable}>
+    <html lang="en" suppressHydrationWarning>
+       <body className={`${inter.variable} ${roboto.variable}`} style={{ fontFamily: 'var(--font-inter)', margin: 0 }}>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             {children}
