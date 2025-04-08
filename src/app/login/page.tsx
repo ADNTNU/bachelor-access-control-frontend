@@ -1,5 +1,6 @@
 import LoginComponent from "@components/auth/LoginComponent";
 import { Container } from "@mui/material";
+import { Suspense } from "react";
 
 export default function LoginPage() {
   return (
@@ -14,7 +15,9 @@ export default function LoginPage() {
         padding: 3,
       }}
     >
-      <LoginComponent onLoginSuccess="redirect" />
+      <Suspense fallback={<div>Loading...</div>}>
+        <LoginComponent onLoginSuccess="redirect" />
+      </Suspense>
     </Container>
   );
 }
