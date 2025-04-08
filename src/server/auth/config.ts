@@ -67,7 +67,7 @@ export const authConfig = {
       async authorize(credentials) {
         let res: Response;
         try {
-          const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+          const baseUrl = process.env.BACKEND_INTERNAL_URL;
           res = await fetch(`${baseUrl}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
