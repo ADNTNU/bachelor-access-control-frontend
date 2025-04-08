@@ -12,7 +12,6 @@ import {
   InvalidCredentialsError,
   UnknownResponseError,
 } from "./CredentialSignInErrors";
-import { jwtDecode } from "jwt-decode";
 
 // /**
 //  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
