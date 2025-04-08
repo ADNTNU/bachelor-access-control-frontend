@@ -1,7 +1,18 @@
 import { isLoginResponseBody } from "@models/backend/auth";
 import type { RequireKeys } from "@models/utils";
-import { type DefaultSession, type NextAuthConfig, type User } from "next-auth";
+import {
+  type DefaultSession,
+  type NextAuthConfig,
+  type User,
+  type Session,
+} from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import {
+  GenericLoginError,
+  InvalidCredentialsError,
+  UnknownResponseError,
+} from "./CredentialSignInErrors";
+import { jwtDecode } from "jwt-decode";
 
 // /**
 //  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -20,8 +31,8 @@ declare module "next-auth" {
   }
 
   interface User {
+    accessToken?: string;
     id?: string;
-    token?: string;
     emailVerified: Date | null;
     // ...other properties
     // role: UserRole;
@@ -44,78 +55,109 @@ declare module "@auth/core/jwt" {
 export const authConfig = {
   providers: [
     CredentialsProvider({
-      name: 'Credentials',
+      name: "Credentials",
       credentials: {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials, req) {
-        // Call Spring Boot backend
-        const res = await fetch("http://localhost:8080/api/auth/login", { //TODO: Add real endpoint to backend login
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: credentials?.username,
-            password: credentials?.password,
-          }),
-        })
-
-        const responseBody: unknown = await res.json();
-
-        if (res.ok && isLoginResponseBody(responseBody) && responseBody.token) {
-          return {
-            token: responseBody.token,
-            id: responseBody.id,
-            // TODO: Check if we should add the more properties to the login response type
-            name: null,
-            email: null,
-            image: null,
-            emailVerified: null,
-          } satisfies RequireKeys<User>;
+      /**
+       * Authorize callback that is called when the user submits the login form.
+       * Calls the backend API to authenticate the user and returns the User and JWT token if successful.
+       * @returns {User | null} - Returns the user object if authentication is successful, otherwise null.
+       */
+      async authorize(credentials) {
+        let res: Response;
+        try {
+          const baseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+          res = await fetch(`${baseUrl}/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: credentials?.username,
+              password: credentials?.password,
+            }),
+          });
+        } catch (error) {
+          console.error("Error in authorize callback:", error);
+          throw new GenericLoginError();
         }
 
-        return null
+        if (res.status === 401) {
+          throw new InvalidCredentialsError();
+        }
+
+        if (!res.ok) {
+          throw new GenericLoginError();
+        }
+
+        try {
+          const responseBody: unknown = await res.json();
+
+          if (!isLoginResponseBody(responseBody)) {
+            console.debug("Unexpected response body:", responseBody);
+            throw new UnknownResponseError();
+          }
+
+          // const decodedToken = jwtDecode(responseBody.token);
+
+          // console.debug("Token:", responseBody.token);
+          // console.debug("Decoded token:", decodedToken);
+
+          if (res.ok && responseBody.token) {
+            return {
+              accessToken: responseBody.token,
+              // TODO: Check if we should add the more properties to the login response type
+              id: responseBody.id.toString(),
+              name: responseBody.name,
+              email: null,
+              image: null,
+              emailVerified: null,
+            } satisfies RequireKeys<User>;
+          }
+        } catch (error) {
+          console.debug("Error in authorize callback:", error);
+          throw new GenericLoginError();
+        }
+
+        return null;
       },
     }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
   session: {
     strategy: "jwt", // so you can store tokens
   },
   callbacks: {
+    /**
+     * jwt callback that is called whenever a JWT is created or updated.
+     * @returns {JWT} - Returns the JWT object with the user and access token.
+     */
     async jwt({ token, user }) {
+      // console.debug("JWT callback:", { token, user });
       if (user?.id) {
-        token.accessToken = user.token
+        token.accessToken = user.accessToken;
         token.user = {
           id: user.id,
           name: user.name,
           email: user.email,
           emailVerified: user.emailVerified,
-        }
+        };
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken
-      if (token.user.id && token.user.email) {
+      // console.debug("Session callback:", { session, token });
+      session.accessToken = token.accessToken;
+      if (token.user.id) {
         session.user = {
           id: token.user.id,
           name: token.user.name,
-          email: token.user.email,
+          email: token.user.email ?? "",
           emailVerified: token.user.emailVerified,
           image: null,
-          token: undefined,
-        } satisfies RequireKeys<User>;
+          accessToken: token.accessToken,
+        } satisfies RequireKeys<Session["user"]>;
       }
-      return session
-    }
+      return session;
+    },
   },
 } satisfies NextAuthConfig;

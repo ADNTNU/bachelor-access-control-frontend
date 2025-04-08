@@ -27,11 +27,12 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],
       "@hooks/*": ["./src/hooks/*"],
       "@models/*": ["./src/models/*"],
       "@material/*": ["./src/material/*"],
+      "@server/*": ["./src/server/*"],
+      "@/*": ["./src/*"]
     }
   },
   "include": [
