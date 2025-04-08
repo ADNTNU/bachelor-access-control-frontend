@@ -12,6 +12,14 @@ RUN npm ci
 # Copy the rest of your application code
 COPY . .
 
+# Build-time environment variables
+ARG AUTH_SECRET
+ARG NEXT_PUBLIC_BACKEND_BASE_URL
+
+# Make them available in the build process
+ENV AUTH_SECRET=$AUTH_SECRET
+ENV NEXT_PUBLIC_BACKEND_BASE_URL=$NEXT_PUBLIC_BACKEND_BASE_URL
+
 # Build your Next.js project (if not already built)
 RUN npm run build
 
