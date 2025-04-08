@@ -1,23 +1,24 @@
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
-import { Roboto, Inter } from 'next/font/google';
-// import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
-// import { ThemeProvider } from '@mui/material/styles';
-// import theme from '@material/theme';
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
+import { Roboto, Inter } from "next/font/google";
+import InitColorSchemeScript from "@mui/material/InitColorSchemeScript";
+import { ThemeProvider } from "@mui/material/styles";
+import { SessionProvider } from "next-auth/react";
+import theme from "@material/theme";
 
 import { type Metadata } from "next";
 
 const roboto = Roboto({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-roboto',
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-roboto",
 });
 
 const inter = Inter({
-  weight: ['300', '400', '500', '700'],
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -31,14 +32,19 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-       <body className={`${inter.variable} ${roboto.variable}`} style={{ fontFamily: 'var(--font-inter)', margin: 0 }}>
+      <body
+        className={`${inter.variable} ${roboto.variable}`}
+        style={{ fontFamily: "var(--font-inter)", margin: 0 }}
+      >
         <AppRouterCacheProvider>
-          {/* <ThemeProvider theme={theme}> */}
-            {/* <InitColorSchemeScript attribute="data-color-scheme" /> */}
-            {children}
-          {/* </ThemeProvider> */}
+          <ThemeProvider theme={theme}>
+            <SessionProvider>
+              <InitColorSchemeScript attribute="data-color-scheme" />
+              {children}
+            </SessionProvider>
+          </ThemeProvider>
         </AppRouterCacheProvider>
-       </body>
+      </body>
     </html>
   );
 }
