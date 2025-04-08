@@ -13,7 +13,15 @@ export default function CompanySelect(props: CompanySelectProps) {
   const { companies, selectedCompanyId, onSelectCompany } = props;
 
   if (!companies.length) {
-    return <Typography>No companies</Typography>;
+    return (
+      <Box
+        sx={{
+          px: 1,
+        }}
+      >
+        <Typography>No companies</Typography>
+      </Box>
+    );
   }
 
   if (companies.length === 1) {

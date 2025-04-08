@@ -121,15 +121,15 @@ export default function DashboardDrawer(props: DashboardDrawerProps) {
           flexDirection: "column",
         }}
       >
+        <Box sx={{ px: 1 }}>
+          <CompanySelect
+            companies={companies}
+            selectedCompanyId={companyId}
+            onSelectCompany={(company) => handleNavigateToCompany(company.id)}
+          />
+        </Box>
+        <Divider sx={{ my: 2 }} />
         <List disablePadding>
-          <Box sx={{ px: 1 }}>
-            <CompanySelect
-              companies={companies}
-              selectedCompanyId={companyId}
-              onSelectCompany={(company) => handleNavigateToCompany(company.id)}
-            />
-          </Box>
-          <Divider sx={{ my: 2 }} />
           {navigationLinks.map((navigationLink) => (
             <ListItem
               key={navigationLink.id}
