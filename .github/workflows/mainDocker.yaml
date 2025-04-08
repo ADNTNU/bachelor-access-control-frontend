@@ -18,8 +18,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.BACHELOR_DOCKERHUB_USERNAME }}
+          password: ${{ secrets.BACHELOR_DOCKERHUB_ACCESSTOKEN }}
 
       - name: Set unique image tag
         id: unique-image-tag
