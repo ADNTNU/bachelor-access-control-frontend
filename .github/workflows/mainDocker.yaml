@@ -33,4 +33,4 @@ jobs:
           tags: danielneset/bachelor-access-control-frontend:${{ steps.unique-image-tag.outputs.tag }}
           build-args: |
             AUTH_SECRET=not-important
-            NEXT_PUBLIC_BACKEND_BASE_URL=not-important
+            NEXT_PUBLIC_BACKEND_BASE_URL=https://not-important.com
