@@ -11,15 +11,19 @@ import {
   ListItemIcon,
   ListItemText,
   Link,
+  type ListItemButtonProps,
+  type ListItemButtonTypeMap,
 } from "@mui/material";
 import { styled, type Theme, type CSSObject } from "@mui/material/styles";
 import { useDrawer } from "./DashboardDrawerProvider";
-import type { ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import PeopleIcon from "@mui/icons-material/People";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import CompanySelect from "./CompanySelect";
 import type { Company } from "@models/backend/company";
+import { routes } from "@/routes";
+import type { OverridableComponent } from "@mui/material/OverridableComponent";
 
 type NavigationLink = {
   id: string;
@@ -93,6 +97,34 @@ const Drawer = styled(MuiDrawer, {
   ],
 }));
 
+export const StyledListItemButton = styled(ListItemButton, {
+  shouldForwardProp: (prop) => prop !== "$drawerOpen",
+})<ListItemButtonProps & { $drawerOpen: boolean }>(
+  ({ theme, $drawerOpen }) => ({
+    minHeight: 48,
+    padding: theme.spacing(1, 1),
+    borderRadius: theme.shape.borderRadius * 2,
+    justifyContent: $drawerOpen ? "initial" : "center",
+  }),
+) as OverridableComponent<ListItemButtonTypeMap<{ $drawerOpen: boolean }>>;
+
+export const StyledListItemIcon = styled(ListItemIcon, {
+  shouldForwardProp: (prop) => prop !== "$drawerOpen" && prop !== "$selected",
+})<{ $drawerOpen: boolean; $selected?: boolean }>(
+  ({ theme, $drawerOpen, $selected }) => ({
+    minWidth: 24,
+    // flexShrink: 0,
+    color: $selected ? theme.palette.primary.dark : undefined,
+    marginRight: $drawerOpen ? theme.spacing(1.2) : "auto",
+  }),
+);
+
+export const StyledListItemText = styled(ListItemText, {
+  shouldForwardProp: (prop) => prop !== "$drawerOpen",
+})<{ $drawerOpen: boolean }>(({ $drawerOpen }) => ({
+  opacity: $drawerOpen ? 1 : 0,
+}));
+
 type DashboardDrawerProps = {
   companyId: string | null;
   companies: Company[];
@@ -102,13 +134,17 @@ export default function DashboardDrawer(props: DashboardDrawerProps) {
   const { companyId, companies } = props;
   const { isOpen: drawerOpen } = useDrawer();
 
+  const router = useRouter();
   const pathname = usePathname();
   const segments = pathname.split("/").filter(Boolean);
-  const basePageSegment = segments[2] ?? "";
+  const basePageSegment = segments[-1] ?? "";
 
-  const handleNavigateToCompany = (companyId: string) => {
-    window.location.href = `/dashboard/${companyId}/${basePageSegment}`;
-  };
+  const handleNavigateToCompany = useCallback(
+    (companyId: string) => {
+      router.push(`${routes.dashboard.home(companyId)}/${basePageSegment}`);
+    },
+    [router, basePageSegment],
+  );
 
   return (
     <Drawer variant="permanent" open={drawerOpen}>
@@ -136,39 +172,23 @@ export default function DashboardDrawer(props: DashboardDrawerProps) {
               disablePadding
               sx={{ display: "block", px: 1 }}
             >
-              <ListItemButton
-                LinkComponent={Link}
+              <StyledListItemButton
+                component={Link}
                 href={`/dashboard/${String(companyId ?? "")}/${navigationLink.segment}`}
                 selected={basePageSegment === navigationLink.segment}
-                sx={{
-                  minHeight: 48,
-                  py: 1,
-                  // px: 1.6,
-                  px: 1,
-                  borderRadius: 2,
-                  justifyContent: drawerOpen ? "initial" : "center",
-                }}
+                $drawerOpen={drawerOpen}
               >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 24,
-                    // flexShrink: 0,
-                    color:
-                      basePageSegment === navigationLink.segment
-                        ? "primary.dark"
-                        : undefined,
-                    mr: drawerOpen ? 1.2 : "auto",
-                  }}
+                <StyledListItemIcon
+                  $selected={basePageSegment === navigationLink.segment}
+                  $drawerOpen={drawerOpen}
                 >
                   {navigationLink.icon}
-                </ListItemIcon>
-                <ListItemText
+                </StyledListItemIcon>
+                <StyledListItemText
                   primary={navigationLink.text}
-                  sx={{
-                    opacity: drawerOpen ? 1 : 0,
-                  }}
+                  $drawerOpen={drawerOpen}
                 />
-              </ListItemButton>
+              </StyledListItemButton>
             </ListItem>
           ))}
         </List>
