@@ -1,16 +1,14 @@
 import { routes } from "@/routes";
 import { Button, Container, Stack, Typography } from "@mui/material";
-import { auth } from "@server/auth";
-import { revalidateCompaniesCache } from "@server/dashboard/fetchCompanies";
-import { redirect } from "next/navigation";
 
-export default async function NoCompaniesErrorPage() {
-  const session = await auth();
+export default async function UnauthorizedErrorPage({
+  params,
+}: {
+  params: Promise<{ rd?: string }>;
+}) {
+  const { rd } = await params;
 
-  if (!session?.accessToken) {
-    redirect(routes.auth.login(routes.error.noCompanies));
-  }
-
+  const redirectUrl = rd ? decodeURIComponent(rd) : null;
   return (
     <Container
       maxWidth="lg"
@@ -29,26 +27,31 @@ export default async function NoCompaniesErrorPage() {
           gutterBottom
           sx={{ textAlign: "center", marginTop: 2 }}
         >
-          You don&apos;t have access to any companies yet.
+          You are not authorized to access this page.
         </Typography>
         <Typography variant="body1" component="p" sx={{ textAlign: "center" }}>
-          Please contact your administrator to get access to a company.
+          Please contact your administrator to get access to this page.
         </Typography>
         <Typography variant="body1" component="p" sx={{ textAlign: "center" }}>
-          If you have just been invited to a company, you can go to the
-          dashboard to start managing access.
+          If you think this is a mistake, please try again later.
         </Typography>
+        {redirectUrl && (
+          <Button
+            variant="contained"
+            color="primary"
+            href={redirectUrl}
+            sx={{ alignSelf: "center", marginTop: 2 }}
+          >
+            Try Again
+          </Button>
+        )}
         <Button
-          variant="contained"
-          color="primary"
-          href={routes.dashboard.index}
+          variant="outlined"
+          color="secondary"
+          href={routes.index}
           sx={{ alignSelf: "center", marginTop: 2 }}
-          onClick={async () => {
-            "use server";
-            await revalidateCompaniesCache(session.accessToken!);
-          }}
         >
-          Go to Dashboard
+          Go to Home
         </Button>
       </Stack>
     </Container>
