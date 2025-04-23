@@ -1,17 +1,19 @@
 "use server";
 
+import apiRoutes from "@/apiRoutes";
 import {
   UnauthenticatedError,
   UnauthorizedError,
   UnknownError,
 } from "@/errors";
-import type { Company } from "@models/backend/company";
+import type { CompanySimpleDto } from "@models/dto/company";
+
 import { createHash } from "crypto";
 import { revalidateTag } from "next/cache";
 
 export async function fetchCompanies(token: string) {
   // TODO: Add correct API URL
-  const res = await fetch(`${process.env.BACKEND_INTERNAL_URL}/company/all`, {
+  const res = await fetch(apiRoutes.company.all, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -34,7 +36,7 @@ export async function fetchCompanies(token: string) {
     );
   }
 
-  return res.json() as Promise<Company[]>;
+  return res.json() as Promise<CompanySimpleDto[]>;
 }
 
 function getTokenSpecificCacheKey(token: string) {

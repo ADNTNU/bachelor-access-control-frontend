@@ -5,14 +5,14 @@ import { type ReactNode } from "react";
 import DrawerToggleButton from "@components/dashboard/DashboardDrawerToggleButton";
 import DrawerHeader from "@components/dashboard/DashboardDrawerHeader";
 import DashboardAppBar from "@components/dashboard/DashboardAppBar";
-import DashboardDrawerProvider from "@components/dashboard/DashboardDrawerProvider";
+import DashboardDrawerProvider from "@/contexts/DashboardDrawerContext/DashboardDrawerProvider";
 import DashboardDrawer from "@components/dashboard/DashboardDrawer";
 import { auth } from "@server/auth";
 import { redirect } from "next/navigation";
 import { fetchCompanies } from "@server/dashboard/fetchCompanies";
 import { routes } from "@/routes";
 import { UnauthenticatedError, UnauthorizedError } from "@/errors";
-import type { Company } from "@models/backend/company";
+import type { CompanySimpleDto } from "@models/dto/company";
 
 /**
  * DashboardLayout component that provides a layout for the dashboard pages.
@@ -53,7 +53,7 @@ export default async function DashboardLayout({
     redirect(routes.error.unknown(routes.dashboard.home(companyId)));
   }
 
-  const companies: Company[] = companiesRes;
+  const companies: CompanySimpleDto[] = companiesRes;
 
   if (companies.length === 0) {
     redirect(routes.error.noCompanies);

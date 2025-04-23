@@ -1,4 +1,4 @@
-import { isLoginResponseBody } from "@models/backend/auth";
+import { isLoginResponseBody } from "@models/dto/auth";
 import type { RequireKeys } from "@models/utils";
 import {
   type DefaultSession,

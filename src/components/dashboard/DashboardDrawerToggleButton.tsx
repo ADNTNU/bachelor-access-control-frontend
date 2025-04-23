@@ -3,7 +3,7 @@
 import { IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import { useDrawer } from "./DashboardDrawerProvider";
+import { useDrawer } from "@/contexts/DashboardDrawerContext/DashboardDrawerProvider";
 
 export default function DrawerToggleButton() {
   const { isOpen, handleDrawerToggle } = useDrawer();

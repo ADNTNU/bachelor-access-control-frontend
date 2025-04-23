@@ -3,7 +3,7 @@ import { auth } from "@server/auth";
 import { fetchCompanies } from "@server/dashboard/fetchCompanies";
 import { redirect } from "next/navigation";
 import { UnauthenticatedError, UnauthorizedError } from "@/errors";
-import type { Company } from "@models/backend/company";
+import type { CompanySimpleDto } from "@models/dto/company";
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -18,8 +18,6 @@ export default async function DashboardPage() {
     (error: Error) => error,
   );
 
-  console.log("companiesRes", companiesRes);
-
   if (companiesRes instanceof UnauthenticatedError) {
     redirect(routes.auth.signOut(routes.dashboard.index));
   } else if (companiesRes instanceof UnauthorizedError) {
@@ -28,7 +26,7 @@ export default async function DashboardPage() {
     redirect(routes.error.unknown(routes.dashboard.index));
   }
 
-  const companies: Company[] = companiesRes;
+  const companies: CompanySimpleDto[] = companiesRes;
 
   if (!companies.length) {
     redirect(routes.error.noCompanies);

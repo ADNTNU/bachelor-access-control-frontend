@@ -15,15 +15,15 @@ import {
   type ListItemButtonTypeMap,
 } from "@mui/material";
 import { styled, type Theme, type CSSObject } from "@mui/material/styles";
-import { useDrawer } from "./DashboardDrawerProvider";
+import { useDrawer } from "@/contexts/DashboardDrawerContext/DashboardDrawerProvider";
 import { useCallback, type ReactNode } from "react";
 import PeopleIcon from "@mui/icons-material/People";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
 import { usePathname, useRouter } from "next/navigation";
 import CompanySelect from "./CompanySelect";
-import type { Company } from "@models/backend/company";
 import { routes } from "@/routes";
 import type { OverridableComponent } from "@mui/material/OverridableComponent";
+import type { CompanySimpleDto } from "@models/dto/company";
 
 type NavigationLink = {
   id: string;
@@ -127,7 +127,7 @@ export const StyledListItemText = styled(ListItemText, {
 
 type DashboardDrawerProps = {
   companyId: string | null;
-  companies: Company[];
+  companies: CompanySimpleDto[];
 };
 
 export default function DashboardDrawer(props: DashboardDrawerProps) {
@@ -140,7 +140,7 @@ export default function DashboardDrawer(props: DashboardDrawerProps) {
   const basePageSegment = segments[-1] ?? "";
 
   const handleNavigateToCompany = useCallback(
-    (companyId: string) => {
+    (companyId: string | number) => {
       router.push(`${routes.dashboard.home(companyId)}/${basePageSegment}`);
     },
     [router, basePageSegment],

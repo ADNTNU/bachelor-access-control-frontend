@@ -9,9 +9,9 @@ export const routes = {
   index: "/",
   dashboard: {
     index: "/dashboard",
-    home: (companyId: string) => `/dashboard/${companyId}`,
-    users: (companyId: string) => `/dashboard/${companyId}/users`,
-    apiKeys: (companyId: string) => `/dashboard/${companyId}/api-keys`,
+    home: (companyId: string | number) => `/dashboard/${companyId}`,
+    users: (companyId: string | number) => `/dashboard/${companyId}/users`,
+    apiKeys: (companyId: string | number) => `/dashboard/${companyId}/api-keys`,
   },
   auth: {
     forgotPassword: "/forgot-password",

@@ -16,7 +16,7 @@ export class UnknownResponseError extends CredentialsSignin {
 }
 
 export function getLoginErrorString(error: string): string {
-  console.log("getLoginErrorString", error);
+  console.error("getLoginErrorString", error);
   if (error == INVALID_CREDENTIALS_ERROR_CODE) {
     return "Invalid username or password";
   } else if (error == GENERIC_LOGIN_ERROR_CODE) {
