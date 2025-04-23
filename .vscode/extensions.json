@@ -1,7 +1,6 @@
 {
   "recommendations": [
     "dbaeumer.vscode-eslint",
-    "formulahendry.auto-close-tag",
     "formulahendry.auto-rename-tag",
     "eamodio.gitlens",
     "christian-kohler.npm-intellisense",

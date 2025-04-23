@@ -1,7 +1,16 @@
 import { routes } from "@/routes";
 import { Button, Container, Stack, Typography } from "@mui/material";
+import { auth } from "@server/auth";
+import { revalidateCompaniesCache } from "@server/dashboard/fetchCompanies";
+import { redirect } from "next/navigation";
 
-export default async function NoCompaniesPage() {
+export default async function NoCompaniesErrorPage() {
+  const session = await auth();
+
+  if (!session?.accessToken) {
+    redirect(routes.auth.login(routes.error.noCompanies));
+  }
+
   return (
     <Container
       maxWidth="lg"
@@ -34,6 +43,10 @@ export default async function NoCompaniesPage() {
           color="primary"
           href={routes.dashboard.index}
           sx={{ alignSelf: "center", marginTop: 2 }}
+          onClick={async () => {
+            "use server";
+            await revalidateCompaniesCache(session.accessToken!);
+          }}
         >
           Go to Dashboard
         </Button>

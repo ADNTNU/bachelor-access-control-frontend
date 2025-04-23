@@ -36,9 +36,6 @@ export function LoginForm(props: LoginFormProps): JSX.Element {
       password: data.password,
     });
 
-    console.log("login submitted");
-    console.log("Login result", result);
-
     if (result?.error) {
       if (result.code) {
         const error: string = getLoginErrorString(result.code);

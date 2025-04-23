@@ -5,6 +5,7 @@
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sourceLanguage": "en",
   "workbench.editor.customLabels.patterns": {
-    "**/**/page.tsx": "${dirname}-${filename} (${extname})"
+    "**/**/page.tsx": "${dirname}-${filename} (${extname})",
+    "**/**/route.ts": "${dirname}-${filename} (${extname})"
   }
 }

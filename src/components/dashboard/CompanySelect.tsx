@@ -1,12 +1,12 @@
 "use client";
 
-import type { Company } from "@models/backend/company";
+import type { CompanySimpleDto } from "@models/dto/company";
 import { Box, MenuItem, Select, Typography } from "@mui/material";
 
 type CompanySelectProps = {
-  companies: Company[];
+  companies: CompanySimpleDto[];
   selectedCompanyId: string | null;
-  onSelectCompany: (company: Company) => void;
+  onSelectCompany: (company: CompanySimpleDto) => void;
 };
 
 export default function CompanySelect(props: CompanySelectProps) {
@@ -43,7 +43,7 @@ export default function CompanySelect(props: CompanySelectProps) {
       onChange={(event) => {
         const selectedId = event.target.value;
         const selectedCompany = companies.find(
-          (company) => company.id === selectedId,
+          (company) => company.id.toString() === selectedId,
         );
         if (selectedCompany) {
           onSelectCompany(selectedCompany);

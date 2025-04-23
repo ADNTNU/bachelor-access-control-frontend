@@ -23,7 +23,7 @@ export default function LoginComponent(props: LoginComponentProps) {
 
   useEffect(() => {
     if (session.status === "authenticated") {
-      console.log("Already authenticated, redirecting");
+      // console.log("Already authenticated, redirecting");
       if (rd) {
         const redirectUrl = decodeURIComponent(rd);
         router.replace(redirectUrl);
@@ -34,7 +34,7 @@ export default function LoginComponent(props: LoginComponentProps) {
   }, [session.status, rd, router]);
 
   const handleLoginSuccess = () => {
-    console.log("Login success, redirecting");
+    // console.log("Login success, redirecting");
     if (onLoginSuccess === "redirect") {
       if (rd) {
         router.replace(rd);

@@ -1,5 +1,6 @@
 "use client";
 
+import { routes } from "@/routes";
 import ThemeSwitcher from "@components/theme/ThemeSwitcher";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
@@ -47,7 +48,7 @@ export default function Page() {
             <Typography variant="h6" gutterBottom>
               Go to dashboard
             </Typography>
-            <Button href="/dashboard">Dashboard</Button>
+            <Button href={routes.dashboard.index}>Dashboard</Button>
           </Box>
         </>
       ) : (
@@ -55,7 +56,7 @@ export default function Page() {
           <Typography variant="h6" gutterBottom>
             Not signed in
           </Typography>
-          <Button href="/login">Sign in</Button>
+          <Button href={routes.auth.login()}>Sign in</Button>
         </Box>
       )}
     </Stack>

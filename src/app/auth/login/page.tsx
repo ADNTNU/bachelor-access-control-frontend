@@ -2,7 +2,7 @@ import LoginComponent from "@components/auth/LoginComponent";
 import { Container } from "@mui/material";
 import { Suspense } from "react";
 
-export default function LoginPage() {
+export default async function LoginPage() {
   return (
     <Container
       maxWidth="sm"
