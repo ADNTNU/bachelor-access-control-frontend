@@ -19,7 +19,7 @@ export const routes = {
     apiKeys: (companyId: string | number) => `/dashboard/${companyId}/api-keys`,
   },
   auth: {
-    forgotPassword: "/forgot-password",
+    forgotPassword: "/auth/forgot-password",
     login: (redirect?: string | null, urlEncode = true) => {
       return getRedirectUrl("/auth/login", redirect, urlEncode);
     },

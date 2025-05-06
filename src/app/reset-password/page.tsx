@@ -1,12 +1,12 @@
-import LoginComponent from "@components/auth/LoginComponent";
+import ResetPasswordForm from "@components/reset-password/ResetPasswordForm";
 import { Container } from "@mui/material";
 
-export default async function LoginPage({
+export default async function ResetPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ rd?: string }>;
+  searchParams: Promise<{ token?: string }>;
 }) {
-  const { rd } = await searchParams;
+  const { token } = await searchParams;
   return (
     <Container
       maxWidth="sm"
@@ -19,7 +19,7 @@ export default async function LoginPage({
         padding: 3,
       }}
     >
-      <LoginComponent onLoginSuccess="redirect" rd={rd} />
+      <ResetPasswordForm token={token} />
     </Container>
   );
 }

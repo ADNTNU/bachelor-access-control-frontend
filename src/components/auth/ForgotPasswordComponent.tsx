@@ -6,6 +6,7 @@ import { LoginForm } from "./LoginForm";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { routes } from "@/routes";
+import { ForgotPasswordForm } from "./ForgotPasswordForm";
 
 export default function ForgotPasswordComponent() {
   const [genericError, setGenericError] = useState<string | null>(null);
@@ -53,7 +54,7 @@ export default function ForgotPasswordComponent() {
         <br />
         If you do not see the email, please check your spam folder.
       </Alert>
-      <LoginForm onFailure={handleError} onSuccess={handleSuccess} />
+      <ForgotPasswordForm onError={handleError} onSuccess={handleSuccess} />
       <Box mt={2}>
         <Link href={routes.auth.login(rd, false)}>Go back to login</Link>
       </Box>

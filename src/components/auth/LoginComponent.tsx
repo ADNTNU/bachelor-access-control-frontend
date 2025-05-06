@@ -3,21 +3,20 @@
 import { Alert, Box, Link, Stack, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { LoginForm } from "./LoginForm";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { routes } from "@/routes";
+import { useRouter } from "next/navigation";
 
 type LoginComponentProps = {
   onLoginSuccess: "redirect" | (() => void);
+  rd?: string;
 };
 
 export default function LoginComponent(props: LoginComponentProps) {
-  const { onLoginSuccess } = props;
+  const { onLoginSuccess, rd } = props;
 
   const [genericError, setGenericError] = useState<string | null>(null);
-
   const router = useRouter();
-  const rd = useSearchParams().get("rd");
 
   const session = useSession();
 
