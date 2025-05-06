@@ -14,18 +14,20 @@ import {
   useRowsGetter,
 } from "@components/dashboard/CRUD/editableDataGrid/cellDefs/administrator";
 import useAdminDialog from "@/contexts/AdminDialogContext/useAdminDialog";
-import EditableDataGrid from "@components/dashboard/CRUD/editableDataGrid";
+import EditableDataGrid from "@components/dashboard/CRUD/editableDataGrid/EditableDataGrid";
 import type { AdministratorListDto } from "@models/dto/administrator";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { routes } from "@/routes";
 
 type AdministratorDataGridProps = {
-  token: string;
+  currentUrl: string;
 };
 
 export default function AdministratorDataGrid(
   props: AdministratorDataGridProps,
 ) {
-  const { token } = props;
+  const { currentUrl } = props;
   const [pagination, setPagination] = useState<PaginationProps>({
     page: 0,
     limit: 25,
@@ -34,6 +36,20 @@ export default function AdministratorDataGrid(
   const [rows, setRows] = useState<APIEncode<AdministratorListDto>[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [loading, setLoading] = useState(true);
+
+  const session = useSession();
+
+  const token = useMemo(() => {
+    if (session.status === "authenticated") {
+      return session.data?.accessToken;
+    }
+    return undefined;
+  }, [session]);
+
+  if (!token && session.status !== "loading") {
+    console.warn("No token found, redirecting to unauthorized page3");
+    redirect(routes.error.unauthorized(currentUrl));
+  }
 
   const { companyId } = useParams<{ companyId: string }>();
 
@@ -86,7 +102,7 @@ export default function AdministratorDataGrid(
       </Stack>
       <EditableDataGrid<
         APIEncode<AdministratorListDto>,
-        typeof initialColumnVisibilityModel,
+        (typeof columns)[number],
         AdministratorDialogFields
       >
         columns={columns}

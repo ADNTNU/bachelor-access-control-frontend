@@ -2,7 +2,6 @@
 
 import {
   Box,
-  Divider,
   List,
   Toolbar,
   Drawer as MuiDrawer,
@@ -16,14 +15,13 @@ import {
 } from "@mui/material";
 import { styled, type Theme, type CSSObject } from "@mui/material/styles";
 import { useDrawer } from "@/contexts/DashboardDrawerContext/DashboardDrawerProvider";
-import { useCallback, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import PeopleIcon from "@mui/icons-material/People";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
-import { usePathname, useRouter } from "next/navigation";
-import CompanySelect from "./CompanySelect";
-import { routes } from "@/routes";
 import type { OverridableComponent } from "@mui/material/OverridableComponent";
-import type { CompanySimpleDto } from "@models/dto/company";
+import { usePathname } from "next/navigation";
+import getDashboardBasePageFromPath from "./getDashboardBasePageFromPath";
+import HomeIcon from "@mui/icons-material/Home";
 
 type NavigationLink = {
   id: string;
@@ -34,10 +32,16 @@ type NavigationLink = {
 
 const navigationLinks: NavigationLink[] = [
   {
-    id: "users",
-    text: "Users",
+    id: "home",
+    text: "Home",
+    icon: <HomeIcon />,
+    segment: "",
+  },
+  {
+    id: "administrators",
+    text: "Administrators",
     icon: <PeopleIcon />,
-    segment: "users",
+    segment: "administrators",
   },
   {
     id: "api-keys",
@@ -127,24 +131,18 @@ export const StyledListItemText = styled(ListItemText, {
 
 type DashboardDrawerProps = {
   companyId: string | null;
-  companies: CompanySimpleDto[];
 };
 
 export default function DashboardDrawer(props: DashboardDrawerProps) {
-  const { companyId, companies } = props;
+  const { companyId } = props;
   const { isOpen: drawerOpen } = useDrawer();
 
-  const router = useRouter();
   const pathname = usePathname();
-  const segments = pathname.split("/").filter(Boolean);
-  const basePageSegment = segments[-1] ?? "";
+  const basePageSegment = getDashboardBasePageFromPath(pathname);
 
-  const handleNavigateToCompany = useCallback(
-    (companyId: string | number) => {
-      router.push(`${routes.dashboard.home(companyId)}/${basePageSegment}`);
-    },
-    [router, basePageSegment],
-  );
+  if (typeof drawerOpen === "undefined") {
+    return null;
+  }
 
   return (
     <Drawer variant="permanent" open={drawerOpen}>
@@ -157,14 +155,6 @@ export default function DashboardDrawer(props: DashboardDrawerProps) {
           flexDirection: "column",
         }}
       >
-        <Box sx={{ px: 1 }}>
-          <CompanySelect
-            companies={companies}
-            selectedCompanyId={companyId}
-            onSelectCompany={(company) => handleNavigateToCompany(company.id)}
-          />
-        </Box>
-        <Divider sx={{ my: 2 }} />
         <List disablePadding>
           {navigationLinks.map((navigationLink) => (
             <ListItem

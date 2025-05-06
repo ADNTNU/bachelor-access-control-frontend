@@ -1,23 +1,43 @@
 "use client";
 
+import { routes } from "@/routes";
 import type { CompanySimpleDto } from "@models/dto/company";
 import { Box, MenuItem, Select, Typography } from "@mui/material";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback } from "react";
+import getDashboardBasePageFromPath from "./getDashboardBasePageFromPath";
 
 type CompanySelectProps = {
   companies: CompanySimpleDto[];
   selectedCompanyId: string | null;
-  onSelectCompany: (company: CompanySimpleDto) => void;
+  onSelectCompany: "navigate" | ((company: CompanySimpleDto) => void);
 };
 
 export default function CompanySelect(props: CompanySelectProps) {
   const { companies, selectedCompanyId, onSelectCompany } = props;
 
+  const pathname = usePathname();
+  const basePageSegment = getDashboardBasePageFromPath(pathname);
+  const router = useRouter();
+
+  const handleSelectCompany = useCallback(
+    (company: CompanySimpleDto) => {
+      if (typeof onSelectCompany === "function") {
+        onSelectCompany(company);
+      }
+      if (typeof onSelectCompany === "string") {
+        router.push(`${routes.dashboard.home(company.id)}/${basePageSegment}`);
+      }
+    },
+    [basePageSegment, onSelectCompany, router],
+  );
+
   if (!companies.length) {
     return (
       <Box
-        sx={{
-          px: 1,
-        }}
+      // sx={{
+      //   px: 1,
+      // }}
       >
         <Typography>No companies</Typography>
       </Box>
@@ -28,9 +48,9 @@ export default function CompanySelect(props: CompanySelectProps) {
     const singleCompany = companies[0];
     return (
       <Box
-        sx={{
-          px: 1,
-        }}
+      // sx={{
+      //   px: 1,
+      // }}
       >
         <Typography>{singleCompany!.name}</Typography>
       </Box>
@@ -46,7 +66,7 @@ export default function CompanySelect(props: CompanySelectProps) {
           (company) => company.id.toString() === selectedId,
         );
         if (selectedCompany) {
-          onSelectCompany(selectedCompany);
+          handleSelectCompany(selectedCompany);
         }
       }}
       displayEmpty

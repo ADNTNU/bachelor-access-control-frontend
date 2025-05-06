@@ -20,6 +20,7 @@ import type {
   InviteAdministratorRequestBody,
   UpdateAdministratorRequestBody,
 } from "@models/dto/administrator";
+import { authenticatedFetch } from "@/utils/fetcher";
 
 type AdministratorFieldsOverrides = {
   accepted: never;
@@ -67,12 +68,29 @@ export const administratorDefaultValues: RequireKeys<
   enabled: false,
   status: "Invited",
   username: "",
+  email: "",
 };
 
 const administratorFields: DialogFields<AdministratorDialogFields> = {
   id: {
     key: "id",
     label: "ID",
+    required: false,
+    addable: false,
+    editable: false,
+    element: (props) => <DialogGridItem {...props} type="text" />,
+  },
+  email: {
+    key: "email",
+    label: "Email",
+    required: true,
+    addable: true,
+    editable: false,
+    element: (props) => <DialogGridItem {...props} type="text" />,
+  },
+  username: {
+    key: "username",
+    label: "Username",
     required: false,
     addable: false,
     editable: false,
@@ -91,14 +109,6 @@ const administratorFields: DialogFields<AdministratorDialogFields> = {
     label: "Status",
     required: false,
     addable: false,
-    editable: false,
-    element: (props) => <DialogGridItem {...props} type="text" />,
-  },
-  username: {
-    key: "username",
-    label: "Username",
-    required: true,
-    addable: true,
     editable: false,
     element: (props) => <DialogGridItem {...props} type="text" />,
   },
@@ -124,8 +134,9 @@ export const administratorInviteHandler: DialogSubmitHandler<
     id: _id,
     name: _name,
     status: _status,
+    username: _username,
     enabled,
-    username,
+    email,
     ...rest
   } = data;
 
@@ -139,47 +150,51 @@ export const administratorInviteHandler: DialogSubmitHandler<
     companyId,
     enabled,
     role: "owner",
-    username,
+    email,
   };
 
-  const res = await fetch(apiRoutes.crud.administrator.invite, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const res = await authenticatedFetch(
+    apiRoutes.crud.administrator.invite,
+    token,
+    {
+      method: "POST",
+      body: JSON.stringify(POSTbody satisfies InviteAdministratorRequestBody),
     },
-    body: JSON.stringify(POSTbody satisfies InviteAdministratorRequestBody),
-  });
+  );
+
   if (!res.ok) {
-    // const body = (await res.json()) as ProductPOSTResponse;
-    // const { message, error, errors } = body;
-    // console.error(message, error);
-    // if (errors && (setError || setGlobalError)) {
-    //   Object.keys(errors).forEach((key) => {
-    //     const typedKey = key as keyof typeof errors;
-    //     assert(errors[typedKey]);
-
-    //     if (typedKey === "generic") {
-    //       if (setGlobalError) {
-    //         setGlobalError(JSON.stringify(errors[typedKey]));
-    //       }
-    //       console.error("Global error: ", errors[typedKey]);
-    //       setLoading(false);
-    //       return;
-    //     }
-
-    //     if (setError) {
-    //       setError(typedKey, { type: "manual", message: translatedError });
-    //     }
-    //   });
-    // }
-    if (setGlobalError) {
-      setGlobalError("Failed to invite administrator.");
+    if (res.status === 401) {
+      console.error("Unauthorized request to invite administrator.");
+      if (setGlobalError) {
+        setGlobalError("Authentication error. Please log in again.");
+      }
+    } else if (res.status === 403) {
+      console.error("Forbidden request to invite administrator.");
+      if (setGlobalError) {
+        setGlobalError(
+          "You don't have permission to invite this administrator.",
+        );
+      }
+    } else if (res.status === 404) {
+      console.error("Not found request to invite administrator.");
+      if (setGlobalError) {
+        setGlobalError("Couldn’t find the requested resource.");
+      }
+    } else if (res.status === 400) {
+      console.error("Bad request to invite administrator.");
+      if (setGlobalError) {
+        setGlobalError("Malformed data in request to invite administrator.");
+      }
     }
+    if (setGlobalError) {
+      setGlobalError("Failed to invite administrator. Please try again later.");
+    }
+
     setLoading(false);
     return false;
   }
-  cancelDialog();
+
+  cancelDialog(true);
   setLoading(false);
   return true;
 };
@@ -198,6 +213,7 @@ export const administratorUpdateHandler: DialogSubmitHandler<
     name: _name,
     status: _status,
     username: _username,
+    email: _email,
     ...rest
   } = data;
 
@@ -213,22 +229,47 @@ export const administratorUpdateHandler: DialogSubmitHandler<
     role: "owner",
   };
 
-  const res = await fetch(apiRoutes.crud.administrator.id(id), {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const res = await authenticatedFetch(
+    apiRoutes.crud.administrator.id(id),
+    token,
+    {
+      method: "PUT",
+      body: JSON.stringify(updateBody satisfies UpdateAdministratorRequestBody),
     },
-    body: JSON.stringify(updateBody satisfies UpdateAdministratorRequestBody),
-  });
+  );
+
   if (!res.ok) {
-    if (setGlobalError) {
-      setGlobalError("Failed to update administrator.");
+    if (res.status === 401) {
+      console.error("Unauthorized request to update administrator.");
+      if (setGlobalError) {
+        setGlobalError("Authentication error. Please log in again.");
+      }
+    } else if (res.status === 403) {
+      console.error("Forbidden request to update administrator.");
+      if (setGlobalError) {
+        setGlobalError(
+          "You don't have permission to update this administrator.",
+        );
+      }
+    } else if (res.status === 404) {
+      console.error("Not found request to update administrator.");
+      if (setGlobalError) {
+        setGlobalError("Couldn’t find the requested resource.");
+      }
+    } else if (res.status === 400) {
+      console.error("Bad request to update administrator.");
+      if (setGlobalError) {
+        setGlobalError("Malformed data in request to update administrator.");
+      }
+    } else if (setGlobalError) {
+      setGlobalError("Failed to update administrator. Please try again later.");
     }
+
     setLoading(false);
     return false;
   }
-  cancelDialog();
+
+  cancelDialog(true);
   setLoading(false);
   return true;
 };
@@ -241,23 +282,50 @@ export const administratorsDeleteHandler: DialogDeleteHandler<
   setGlobalError,
   token,
 }): Promise<boolean> => {
-  const res = await fetch(apiRoutes.crud.administrator.index, {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const res = await authenticatedFetch(
+    apiRoutes.crud.administrator.index,
+    token,
+    {
+      method: "DELETE",
+      body: JSON.stringify({
+        administratorIds: identifiers,
+        companyId,
+      } satisfies DeleteAdministratorRequestBody),
     },
-    body: JSON.stringify({
-      administratorIds: identifiers,
-      companyId,
-    } satisfies DeleteAdministratorRequestBody),
-  });
+  );
+
   if (!res.ok) {
-    if (setGlobalError) {
-      setGlobalError("Failed to delete administrator(s).");
+    if (res.status === 401) {
+      console.error("Unauthorized request to delete administrator(s).");
+      if (setGlobalError) {
+        setGlobalError("Authentication error. Please log in again.");
+      }
+    } else if (res.status === 403) {
+      console.error("Forbidden request to delete administrator(s).");
+      if (setGlobalError) {
+        setGlobalError(
+          "You don't have permission to delete this administrator(s).",
+        );
+      }
+    } else if (res.status === 404) {
+      console.error("Not found request to delete administrator(s).");
+      if (setGlobalError) {
+        setGlobalError("Couldn’t find the requested resource.");
+      }
+    } else if (res.status === 400) {
+      console.error("Bad request to delete administrator(s).");
+      if (setGlobalError) {
+        setGlobalError("Malformed data in request to delete administrator(s).");
+      }
+    } else if (setGlobalError) {
+      setGlobalError(
+        "Failed to delete administrator(s). Please try again later.",
+      );
     }
+
     return false;
   }
+
   return true;
 };
 

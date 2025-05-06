@@ -30,6 +30,21 @@ export default async function fetcher<T>(
   return responseData;
 }
 
+export async function authenticatedFetch(
+  url: string,
+  token: string,
+  options?: Parameters<typeof fetch>[1],
+) {
+  return fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      ...options?.headers,
+    },
+  });
+}
+
 export type FilteredPaginatedFetcherProps<B> = {
   url: string;
   token: string;

@@ -50,11 +50,12 @@ export type DialogSubmitHandler<T extends FieldValues> = (
   props: {
     setError: UseFormSetError<T>;
     setGlobalError: Dispatch<SetStateAction<string | null>>;
-    cancelDialog: () => void;
+    cancelDialog: (force?: boolean) => void;
     setLoading: Dispatch<SetStateAction<boolean>>;
     fields: DialogFields<T>;
     companyId: number;
     token: string;
+    openAnyDialog: (dialog: string, data: object, force?: boolean) => void;
   },
   event?: React.BaseSyntheticEvent,
 ) => Promise<boolean>;
@@ -92,13 +93,15 @@ type SimpleFieldInputType =
   | "date"
   | "datetime"
   | "image"
-  | "number"
+  | "integer"
+  | "float"
   | "text"
   | "textarea";
 
 export type DialogGridItemProps<T extends FieldValues> = {
   field: DialogFields<T>[keyof T];
   setDialogContent: Dispatch<SetStateAction<T | null>>;
+  setHasDoneChanges: Dispatch<SetStateAction<boolean>>;
   // value?: T[keyof T];
   state?: {
     isEdit?: boolean;
@@ -134,7 +137,15 @@ type SimpleFieldInputProps<T extends FieldValues> = {
 export function SimpleFieldInput<T extends FieldValues>(
   props: SimpleFieldInputProps<T>,
 ) {
-  const { field, state, type, control, setValue, setDialogContent } = props;
+  const {
+    field,
+    state,
+    type,
+    control,
+    setValue,
+    setDialogContent,
+    setHasDoneChanges,
+  } = props;
   const { key, editable } = field;
   const { isEdit, isDelete } = state ?? {};
 
@@ -211,6 +222,7 @@ export function SimpleFieldInput<T extends FieldValues>(
         }
         return { [key]: imgSrc } as T;
       });
+      setHasDoneChanges(true);
 
       setValue(key as Path<T>, imgSrc as PathValue<T, Path<T>>);
     } catch (error) {
@@ -236,11 +248,16 @@ export function SimpleFieldInput<T extends FieldValues>(
               disabled={(isEdit && !editable) ?? isDelete}
               value={value || ""}
               {...controllerField}
+              onChange={(e) => {
+                setHasDoneChanges(true);
+                controllerField.onChange(e);
+              }}
+              required={field.required}
             />
           )}
         />
       );
-    case "number":
+    case "integer":
       return (
         <Controller
           name={key as Path<T>}
@@ -253,8 +270,33 @@ export function SimpleFieldInput<T extends FieldValues>(
               disabled={(isEdit && !editable) ?? isDelete}
               type="number"
               {...controllerField}
-              // onChange={(e) => onChange(e, registerOnChange)}
-              // {...restRegisterReturnProps}
+              onChange={(e) => {
+                setHasDoneChanges(true);
+                controllerField.onChange(e);
+              }}
+              required={field.required}
+            />
+          )}
+        />
+      );
+    case "float":
+      return (
+        <Controller
+          name={key as Path<T>}
+          control={control}
+          render={({ field: controllerField, fieldState: { error } }) => (
+            <TextField
+              fullWidth
+              error={!!error}
+              helperText={error?.message}
+              disabled={(isEdit && !editable) ?? isDelete}
+              type="number"
+              {...controllerField}
+              onChange={(e) => {
+                setHasDoneChanges(true);
+                controllerField.onChange(e);
+              }}
+              required={field.required}
             />
           )}
         />
@@ -278,6 +320,7 @@ export function SimpleFieldInput<T extends FieldValues>(
                   type="file"
                   {...controllerField}
                   onChange={fileOnChange}
+                  required={field.required}
                 />
                 <canvas id={`${key}-canvas`} style={{ display: "none" }} />
               </>
@@ -310,12 +353,17 @@ export function SimpleFieldInput<T extends FieldValues>(
                 textField: {
                   error: !!error,
                   helperText: error?.message,
+                  required: field.required,
                 },
                 field: {
                   clearable: !field.required,
                 },
               }}
               {...controllerField}
+              onChange={(e) => {
+                setHasDoneChanges(true);
+                controllerField.onChange(e);
+              }}
             />
           )}
         />
@@ -332,10 +380,14 @@ export function SimpleFieldInput<T extends FieldValues>(
                 textField: {
                   error: !!error,
                   helperText: error?.message,
+                  required: field.required,
                 },
               }}
               {...controllerField}
-              // {...restRegisterReturnProps}
+              onChange={(e) => {
+                setHasDoneChanges(true);
+                controllerField.onChange(e);
+              }}
             />
           )}
         />
@@ -353,9 +405,11 @@ export function SimpleFieldInput<T extends FieldValues>(
               disabled={(isEdit && !editable) ?? isDelete}
               type="checkbox"
               {...controllerField}
-              // onChange={(e) => onChange(e, registerOnChange)}
-              // defaultChecked={value}
-              // {...restRegisterReturnProps}
+              onChange={(e) => {
+                setHasDoneChanges(true);
+                controllerField.onChange(e);
+              }}
+              required={field.required}
             />
           )}
         />
@@ -380,8 +434,11 @@ export function SimpleFieldInput<T extends FieldValues>(
               disabled={(isEdit && !editable) ?? isDelete}
               value={value || ""}
               {...controllerField}
-              // onChange={(e) => onChange(e, registerOnChange)}
-              // {...restRegisterReturnProps}
+              onChange={(e) => {
+                setHasDoneChanges(true);
+                controllerField.onChange(e);
+              }}
+              required={field.required}
             />
           )}
         />

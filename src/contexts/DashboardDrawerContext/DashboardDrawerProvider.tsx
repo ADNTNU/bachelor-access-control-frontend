@@ -1,9 +1,15 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 type DashboardDrawerContextType = {
-  isOpen: boolean;
+  isOpen: boolean | undefined;
   handleDrawerOpen: () => void;
   handleDrawerClose: () => void;
   handleDrawerToggle: () => void;
@@ -13,6 +19,8 @@ const DashboardDrawerContext = createContext<
   DashboardDrawerContextType | undefined
 >(undefined);
 
+const LOCAL_STORAGE_KEY = "dashboard-drawer-open";
+
 export default function DashboardDrawerProvider({
   children,
   defaultOpen = true,
@@ -20,7 +28,23 @@ export default function DashboardDrawerProvider({
   children: ReactNode;
   defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [open, setOpen] = useState<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored !== null) {
+      setOpen(stored === "true");
+    } else {
+      setOpen(defaultOpen);
+    }
+  }, [defaultOpen]);
+
+  // When open changes, save to localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(LOCAL_STORAGE_KEY, String(open));
+    }
+  }, [open]);
 
   const handleDrawerOpen = () => {
     setOpen(true);

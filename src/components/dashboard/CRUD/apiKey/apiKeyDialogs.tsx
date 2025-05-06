@@ -12,16 +12,35 @@ import apiKeyFields, {
 import AddDialog from "@components/dashboard/CRUD/dialogs/AddDialog";
 import EditDialog from "@components/dashboard/CRUD/dialogs/EditDialog";
 import DeleteDialog from "@components/dashboard/CRUD/dialogs/DeleteDialog";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
+import ConfirmDialog from "../dialogs/ConfirmDialog";
+import { useSession } from "next-auth/react";
+import { useMemo } from "react";
+import { routes } from "@/routes";
+import { ClientIdSecretDialog } from "./ClientIdSecretDialog";
 
 type ApiKeyDialogsProps = {
-  token: string;
+  currentUrl: string;
 };
 
 export default function ApiKeyDialogs(props: ApiKeyDialogsProps) {
-  const { token } = props;
+  const { currentUrl } = props;
   const { companyId } = useParams<{ companyId: string }>();
   const companyIdNumber = Number(companyId);
+
+  const session = useSession();
+
+  const token = useMemo(() => {
+    if (session.status === "authenticated") {
+      return session.data?.accessToken;
+    }
+    return undefined;
+  }, [session]);
+
+  if (!token && session.status !== "loading") {
+    console.warn("No token found, redirecting to unauthorized page6");
+    redirect(routes.error.unauthorized(currentUrl));
+  }
 
   return (
     <>
@@ -31,7 +50,7 @@ export default function ApiKeyDialogs(props: ApiKeyDialogsProps) {
         title="Invite apiKey"
         defaultValues={apiKeyDefaultValues}
         companyId={companyIdNumber}
-        token={token}
+        currentUrl={currentUrl}
       />
       <EditDialog<ApiKeyDialogFields, APIEncode<ApiKeyListDto>>
         fields={apiKeyFields}
@@ -39,7 +58,7 @@ export default function ApiKeyDialogs(props: ApiKeyDialogsProps) {
         title="Update apiKey"
         defaultValues={apiKeyDefaultValues}
         companyId={companyIdNumber}
-        token={token}
+        currentUrl={currentUrl}
       />
       <DeleteDialog<ApiKeyDialogFields, APIEncode<ApiKeyListDto>>
         singularTitle="Are you sure you want to delete the apiKey?"
@@ -48,8 +67,10 @@ export default function ApiKeyDialogs(props: ApiKeyDialogsProps) {
         onSubmit={apiKeysDeleteHandler}
         defaultValues={apiKeyDefaultValues}
         companyId={companyIdNumber}
-        token={token}
+        currentUrl={currentUrl}
       />
+      <ConfirmDialog />
+      <ClientIdSecretDialog />
     </>
   );
 }

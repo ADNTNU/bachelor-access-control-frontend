@@ -19,13 +19,18 @@ export type AdminDialogsContextType<
   setEditDialogData: Dispatch<SetStateAction<T | null>>;
   deleteDialogData: T | null;
   setDeleteDialogData: Dispatch<SetStateAction<T | null>>;
+  customDialogsOpen: Record<string, boolean>;
+  customDialogsData: Record<string, object>;
+  setHasDoneChanges: Dispatch<SetStateAction<boolean>>;
   selectedRows: U[];
   setSelectedRows: Dispatch<SetStateAction<U[]>>;
   error: string | null;
   setError: Dispatch<SetStateAction<string | null>>;
+  currentDialog: string | null;
   openDialog: (dialog: "add" | "delete" | "edit") => void;
-  cancelDialog: () => void;
-  closeDialog: () => void;
+  openAnyDialog: (dialog: string, data: object, force?: boolean) => void;
+  cancelDialog: (force?: boolean) => void;
+  closeCurrentDialog: () => void;
   rowMutator: KeyedMutator<AdminCrudListResponse<U>> | undefined;
   setRowMutator: Dispatch<
     SetStateAction<KeyedMutator<AdminCrudListResponse<U>> | undefined>
@@ -33,8 +38,9 @@ export type AdminDialogsContextType<
   rowDataToDialogData: (rowData: U) => Promise<T>;
   setCommitedChanges: Dispatch<SetStateAction<boolean>>;
   commitedChanges: boolean;
-  // setFilter: Dispatch<SetStateAction<F>>;
-  // filter: F;
+  confirmDialogOpen: boolean;
+  cancelConfirmDialog: () => void;
+  confirmConfirmDialog: () => void;
 };
 
 export const AdminDialogsContext = createContext({});

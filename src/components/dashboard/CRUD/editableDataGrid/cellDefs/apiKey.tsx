@@ -4,7 +4,7 @@ import type { APIEncode } from "@models/utils";
 import useSWR from "swr";
 import useDebounce from "@hooks/useDebounce";
 import apiRoutes from "@/apiRoutes";
-import { type TypeSafeColDef, type TypeSafeColVisibility } from "./common";
+import { type TypeSafeColDef } from "./common";
 import type {
   ApiKeyListDto,
   ListApiKeyRequestBody,
@@ -57,7 +57,7 @@ export const columns: TypeSafeColDef<
 
 export function useRowsGetter(
   props: ListApiKeyRequestBody,
-  token: string,
+  token?: string,
   debounce = 1000,
 ) {
   const debouncedPaginationPage = useDebounce<ListApiKeyRequestBody["page"]>({
@@ -79,20 +79,30 @@ export function useRowsGetter(
       // filters: debouncedFilters,
       // sort: debouncedSort,
     },
-    ({ url, page, size, companyId }: { url: string } & ListApiKeyRequestBody) =>
-      paginatedFetcher<ListApiKeyResponse, ListApiKeyRequestBody>({
+    ({
+      url,
+      page,
+      size,
+      companyId,
+    }: { url: string } & ListApiKeyRequestBody) => {
+      if (!token) {
+        throw new Error("No token found");
+      }
+      return paginatedFetcher<ListApiKeyResponse, ListApiKeyRequestBody>({
         url,
         body: { page, size, companyId },
         token,
-      }),
+      });
+    },
     { revalidateOnFocus: false },
   );
 
   return swrObj;
 }
 
-export const initialColumnVisibilityModel: TypeSafeColVisibility<
-  typeof columns
+export const initialColumnVisibilityModel: Record<
+  (typeof columns)[number]["field"],
+  boolean
 > = {
   id: true,
   enabled: true,

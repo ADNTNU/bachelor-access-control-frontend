@@ -1,7 +1,6 @@
 import {
   getGridDateOperators,
   type GridColDef,
-  type GridColumnVisibilityModel,
   type GridValidRowModel,
 } from "@mui/x-data-grid";
 import dayjs from "dayjs";
@@ -15,14 +14,6 @@ export type FieldFromColumns<T> = T extends (infer U)[]
     ? F
     : never
   : never;
-
-export type TypeSafeColVisibility<T> = T extends (infer U)[]
-  ? U extends { field: infer F }
-    ? F extends number | string | symbol
-      ? Record<F, boolean> & GridColumnVisibilityModel
-      : { [K in keyof U]: boolean } & GridColumnVisibilityModel
-    : { [K in keyof U]: boolean } & GridColumnVisibilityModel
-  : { [K in keyof T]: boolean } & GridColumnVisibilityModel;
 
 export function dateValueFormatter(
   data?: Date | number,

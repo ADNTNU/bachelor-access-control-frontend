@@ -14,16 +14,32 @@ import {
   useRowsGetter,
 } from "@components/dashboard/CRUD/editableDataGrid/cellDefs/apiKey";
 import useAdminDialog from "@/contexts/AdminDialogContext/useAdminDialog";
-import EditableDataGrid from "@components/dashboard/CRUD/editableDataGrid";
+import EditableDataGrid from "@components/dashboard/CRUD/editableDataGrid/EditableDataGrid";
 import type { ApiKeyListDto } from "@models/dto/apiKey";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { routes } from "@/routes";
 
 type ApiKeyDataGridProps = {
-  token: string;
+  currentUrl: string;
 };
 
 export default function ApiKeyDataGrid(props: ApiKeyDataGridProps) {
-  const { token } = props;
+  const { currentUrl } = props;
+  const session = useSession();
+
+  const token = useMemo(() => {
+    if (session.status === "authenticated") {
+      return session.data?.accessToken;
+    }
+    return undefined;
+  }, [session]);
+
+  if (!token && session.status !== "loading") {
+    console.warn("No token found, redirecting to unauthorized page5");
+    redirect(routes.error.unauthorized(currentUrl));
+  }
+
   const [pagination, setPagination] = useState<PaginationProps>({
     page: 0,
     limit: 25,
@@ -78,13 +94,13 @@ export default function ApiKeyDataGrid(props: ApiKeyDataGridProps) {
   return (
     <Stack sx={{ minHeight: 400, width: "100%" }} gap={2}>
       <Stack direction="row" alignItems="center" gap={2} flexWrap="wrap">
-        <AddButton />
+        <AddButton label="Create" />
         <EditButton />
         <DeleteButton />
       </Stack>
       <EditableDataGrid<
         APIEncode<ApiKeyListDto>,
-        typeof initialColumnVisibilityModel,
+        (typeof columns)[number],
         ApiKeyDialogFields
       >
         columns={columns}

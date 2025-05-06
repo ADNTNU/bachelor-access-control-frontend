@@ -23,8 +23,10 @@ export default function PageSection(props: PageSectionProps) {
   const sxWithDefaults = {
     paddingY: paddingY ? 4 : undefined,
     paddingX: noPaddingX ? 0 : undefined,
+    display: "flex",
+    flexDirection: "column",
     ...sx,
-  };
+  } satisfies ContainerProps["sx"];
 
   return (
     <Container

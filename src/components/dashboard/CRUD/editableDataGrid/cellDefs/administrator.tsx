@@ -4,7 +4,7 @@ import type { APIEncode } from "@models/utils";
 import useSWR from "swr";
 import useDebounce from "@hooks/useDebounce";
 import apiRoutes from "@/apiRoutes";
-import { type TypeSafeColDef, type TypeSafeColVisibility } from "./common";
+import { type TypeSafeColDef } from "./common";
 import type {
   AdministratorListDto,
   ListAdministratorRequestBody,
@@ -20,11 +20,20 @@ export const columns: TypeSafeColDef<
   APIEncode<AdministratorListDto>,
   AggregateFields
 >[] = [
-  { field: "id", headerName: "ID", flex: 1, description: "Administrator ID" },
+  {
+    field: "id",
+    headerName: "ID",
+    flex: 1,
+    minWidth: 100,
+    maxWidth: 100,
+    description: "Administrator ID",
+  },
   {
     field: "status",
     headerName: "Status",
     flex: 1,
+    minWidth: 100,
+    maxWidth: 100,
     description: "Status",
     valueGetter: (_, row) => {
       const { accepted, enabled } = row;
@@ -37,11 +46,32 @@ export const columns: TypeSafeColDef<
       }
     },
   },
+  {
+    field: "name",
+    headerName: "Name",
+    flex: 1,
+    minWidth: 100,
+    description: "Administrator Name",
+  },
+  {
+    field: "email",
+    headerName: "Email",
+    flex: 1,
+    minWidth: 100,
+    description: "Administrator Email",
+  },
+  {
+    field: "username",
+    headerName: "Username",
+    flex: 1,
+    minWidth: 100,
+    description: "Administrator Username",
+  },
 ];
 
 export function useRowsGetter(
   props: ListAdministratorRequestBody,
-  token: string,
+  token?: string,
   debounce = 1000,
 ) {
   const debouncedPaginationPage = useDebounce<
@@ -72,22 +102,28 @@ export function useRowsGetter(
       page,
       size,
       companyId,
-    }: { url: string } & ListAdministratorRequestBody) =>
-      paginatedFetcher<ListAdministratorResponse, ListAdministratorRequestBody>(
-        {
-          url,
-          body: { page, size, companyId },
-          token,
-        },
-      ),
+    }: { url: string } & ListAdministratorRequestBody) => {
+      if (!token) {
+        throw new Error("No token found");
+      }
+      return paginatedFetcher<
+        ListAdministratorResponse,
+        ListAdministratorRequestBody
+      >({
+        url,
+        body: { page, size, companyId },
+        token,
+      });
+    },
     { revalidateOnFocus: false },
   );
 
   return swrObj;
 }
 
-export const initialColumnVisibilityModel: TypeSafeColVisibility<
-  typeof columns
+export const initialColumnVisibilityModel: Record<
+  (typeof columns)[number]["field"],
+  boolean
 > = {
   id: true,
   name: true,
@@ -95,4 +131,5 @@ export const initialColumnVisibilityModel: TypeSafeColVisibility<
   accepted: true,
   enabled: true,
   username: true,
+  email: false,
 };

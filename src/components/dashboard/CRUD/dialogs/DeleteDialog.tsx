@@ -12,7 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import type { WithId } from "@models/utils";
 import {
   type DefaultValues,
@@ -30,6 +30,9 @@ import {
   type GroupingProps,
 } from "./common";
 import useAdminDialog from "@/contexts/AdminDialogContext/useAdminDialog";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { routes } from "@/routes";
 
 type DeleteDialogProps<T extends FieldValuesWithId> = {
   fields: DialogFields<T>;
@@ -40,7 +43,7 @@ type DeleteDialogProps<T extends FieldValuesWithId> = {
   useFormProps?: UseFormProps<T>;
   defaultValues: DefaultValues<T>;
   companyId: number;
-  token: string;
+  currentUrl: string;
 };
 
 export default function DeleteDialog<
@@ -56,8 +59,22 @@ export default function DeleteDialog<
     useFormProps,
     defaultValues,
     companyId,
-    token,
+    currentUrl,
   } = props;
+
+  const session = useSession();
+
+  const token = useMemo(() => {
+    if (session.status === "authenticated") {
+      return session.data?.accessToken;
+    }
+    return undefined;
+  }, [session]);
+
+  if (!token && session.status !== "loading") {
+    console.warn("No token found, redirecting to unauthorized page");
+    redirect(routes.error.unauthorized(currentUrl));
+  }
 
   const [prevData, setPrevData] = useState<T | null>(null);
   const [initialDialogData, setInitialDialogData] = useState<T | null>(null);
@@ -70,7 +87,7 @@ export default function DeleteDialog<
     setError: setGlobalError,
     error,
     cancelDialog,
-    closeDialog,
+    closeCurrentDialog,
     setDeleteDialogData,
     setCommitedChanges,
   } = useAdminDialog<T, U>();
@@ -84,6 +101,11 @@ export default function DeleteDialog<
   const handleDelete = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     let ids: T["id"][] = [];
+
+    if (!token) {
+      setGlobalError("Authentication data not found");
+      return;
+    }
 
     if (dialogData) {
       ids = [dialogData.id];
@@ -105,7 +127,7 @@ export default function DeleteDialog<
 
     if (res) {
       setCommitedChanges(true);
-      closeDialog();
+      closeCurrentDialog();
     }
     setLoading(false);
   };
@@ -113,8 +135,9 @@ export default function DeleteDialog<
   useEffect(() => {
     if (!open) {
       reset();
+      setGlobalError(null);
     }
-  }, [open, reset]);
+  }, [open, reset, setGlobalError]);
 
   useEffect(() => {
     if (prevData === null && dialogData) {
@@ -187,6 +210,8 @@ export default function DeleteDialog<
                         isDelete: true,
                       },
                       setDialogContent: setDeleteDialogData,
+                      // eslint-disable-next-line @typescript-eslint/no-empty-function
+                      setHasDoneChanges: () => {},
                       register,
                       control,
                       setValue,
@@ -232,6 +257,8 @@ export default function DeleteDialog<
                                     isDelete: true,
                                   },
                                   setDialogContent: setDeleteDialogData,
+                                  // eslint-disable-next-line @typescript-eslint/no-empty-function
+                                  setHasDoneChanges: () => {},
                                   grid: false,
                                   register,
                                   control,
@@ -250,8 +277,8 @@ export default function DeleteDialog<
           ) : null}
           {!dialogData && selectedRows.length > 0 ? (
             <Typography variant="body1">
-              Slett {selectedRows.length}{" "}
-              {selectedRows.length === 1 ? "valt" : "valde"} element
+              Delete {selectedRows.length} selected{" "}
+              {selectedRows.length === 1 ? "row" : "rows"}?
             </Typography>
           ) : null}
         </DialogContent>
@@ -261,7 +288,7 @@ export default function DeleteDialog<
             onClick={() => cancelDialog()}
             disabled={loading}
           >
-            Nei, gå tilbake
+            No, cancel
           </Button>
           <Button
             variant="contained"
@@ -269,7 +296,7 @@ export default function DeleteDialog<
             type="submit"
             disabled={loading}
           >
-            Slett
+            Delete
           </Button>
         </DialogActions>
       </form>

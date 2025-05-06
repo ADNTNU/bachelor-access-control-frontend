@@ -4,18 +4,20 @@ import { routes } from "@/routes";
 import AdministratorDataGrid from "@components/dashboard/CRUD/administrator/AdministratorDataGrid";
 import AdministratorDialogs from "@components/dashboard/CRUD/administrator/administratorDialogs";
 import { administratorRowDataToDialogData } from "@components/dashboard/CRUD/administrator/administratorRowToDialogData";
+import { PageTitle } from "@components/dashboard/PageTitle";
 import PageSection from "@components/layout/PageSection";
 import { auth } from "@server/auth";
 import { redirect } from "next/navigation";
 
 export async function generateMetadata() {
   return {
-    title: "Users",
-    description: "User administration page for bachelor access control system",
+    title: "Administrators",
+    description:
+      "Administration page for managing administrators in the company.",
   };
 }
 
-export default async function UsersPage({
+export default async function AdministratorsPage({
   params,
 }: {
   params: Promise<{ companyId: string }>;
@@ -25,8 +27,10 @@ export default async function UsersPage({
   const { companyId } = await params;
 
   if (!token) {
-    console.warn("No token found, redirecting to unauthorized page");
-    redirect(routes.error.unauthorized(routes.dashboard.users(companyId)));
+    console.warn("No token found, redirecting to unauthorized page1");
+    redirect(
+      routes.error.unauthorized(routes.dashboard.administrators(companyId)),
+    );
   }
 
   return (
@@ -34,10 +38,15 @@ export default async function UsersPage({
       <AdminDialogProvider
         rowDataToDialogData={administratorRowDataToDialogData}
       >
-        <PageSection noPaddingX>
-          <AdministratorDataGrid token={token} />
+        <PageSection noPaddingX sx={{ gap: 2 }}>
+          <PageTitle title="Administrators" />
+          <AdministratorDataGrid
+            currentUrl={routes.dashboard.administrators(companyId)}
+          />
         </PageSection>
-        <AdministratorDialogs token={token} />
+        <AdministratorDialogs
+          currentUrl={routes.dashboard.administrators(companyId)}
+        />
       </AdminDialogProvider>
     </TestProvider>
   );
