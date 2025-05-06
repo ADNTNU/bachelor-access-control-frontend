@@ -84,6 +84,7 @@ export type DialogFields<T extends FieldValues> = {
     addable: boolean;
     editable: boolean;
     hiddenInEdit?: boolean;
+    hiddenInDelete?: boolean;
     element: (props: Omit<DialogGridItemProps<T>, "type">) => ReactNode;
   };
 };

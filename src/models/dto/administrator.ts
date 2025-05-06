@@ -10,6 +10,7 @@ export type AdministratorListDto = {
   id: number;
   enabled: boolean;
   accepted: boolean;
+  registered: boolean;
   username: string;
   email: string;
   name: string;

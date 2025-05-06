@@ -6,15 +6,13 @@ import { apiKeyRowDataToDialogData } from "@components/dashboard/CRUD/apiKey/api
 import { PageTitle } from "@components/dashboard/PageTitle";
 import PageSection from "@components/layout/PageSection";
 import { auth } from "@server/auth";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-export async function generateMetadata() {
-  return {
-    title: "Api Keys",
-    description:
-      "Api key administration page for bachelor access control system",
-  };
-}
+export const metadata: Metadata = {
+  title: "Dashboard - Api Keys",
+  description: "Api key administration page for bachelor access control system",
+};
 
 export default async function ApiKeysPage({
   params,

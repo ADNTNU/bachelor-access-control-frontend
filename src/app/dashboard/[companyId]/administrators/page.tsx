@@ -7,15 +7,14 @@ import { administratorRowDataToDialogData } from "@components/dashboard/CRUD/adm
 import { PageTitle } from "@components/dashboard/PageTitle";
 import PageSection from "@components/layout/PageSection";
 import { auth } from "@server/auth";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-export async function generateMetadata() {
-  return {
-    title: "Administrators",
-    description:
-      "Administration page for managing administrators in the company.",
-  };
-}
+export const metadata: Metadata = {
+  title: "Dashboard - Administrators",
+  description:
+    "Administration page for managing administrators in the company.",
+};
 
 export default async function AdministratorsPage({
   params,

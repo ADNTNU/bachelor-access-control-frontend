@@ -1,5 +1,11 @@
 import LoginComponent from "@components/auth/LoginComponent";
 import { Container } from "@mui/material";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Login",
+  description: "Login to your account",
+};
 
 export default async function LoginPage({
   searchParams,

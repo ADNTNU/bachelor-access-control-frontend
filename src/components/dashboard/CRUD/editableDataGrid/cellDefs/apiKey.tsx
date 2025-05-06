@@ -76,6 +76,7 @@ export function useRowsGetter(
       page: debouncedPaginationPage,
       size: debouncedPaginationSize,
       companyId,
+      token,
       // filters: debouncedFilters,
       // sort: debouncedSort,
     },
@@ -84,7 +85,8 @@ export function useRowsGetter(
       page,
       size,
       companyId,
-    }: { url: string } & ListApiKeyRequestBody) => {
+      token,
+    }: { url: string; token: string } & ListApiKeyRequestBody) => {
       if (!token) {
         throw new Error("No token found");
       }

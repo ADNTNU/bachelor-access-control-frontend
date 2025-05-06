@@ -52,6 +52,10 @@ export const columns: TypeSafeColDef<
     flex: 1,
     minWidth: 100,
     description: "Administrator Name",
+    valueGetter: (_, row) => {
+      const { registered, name } = row;
+      return registered ? name : "N/A";
+    },
   },
   {
     field: "email",
@@ -66,6 +70,10 @@ export const columns: TypeSafeColDef<
     flex: 1,
     minWidth: 100,
     description: "Administrator Username",
+    valueGetter: (_, row) => {
+      const { registered, username } = row;
+      return registered ? username : "N/A";
+    },
   },
 ];
 
@@ -94,6 +102,7 @@ export function useRowsGetter(
       page: debouncedPaginationPage,
       size: debouncedPaginationSize,
       companyId,
+      token,
       // filters: debouncedFilters,
       // sort: debouncedSort,
     },
@@ -102,7 +111,8 @@ export function useRowsGetter(
       page,
       size,
       companyId,
-    }: { url: string } & ListAdministratorRequestBody) => {
+      token,
+    }: { url: string; token: string } & ListAdministratorRequestBody) => {
       if (!token) {
         throw new Error("No token found");
       }
@@ -130,6 +140,7 @@ export const initialColumnVisibilityModel: Record<
   status: true,
   accepted: true,
   enabled: true,
-  username: true,
-  email: false,
+  username: false,
+  email: true,
+  registered: false,
 };

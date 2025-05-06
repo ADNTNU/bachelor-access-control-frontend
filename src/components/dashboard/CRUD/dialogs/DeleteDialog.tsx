@@ -189,7 +189,7 @@ export default function DeleteDialog<
               ).map((key) => {
                 const typedKey = key;
                 const field = fields[typedKey];
-                // if (!field.editable && field.hiddenInEdit) return null;
+                if (field.hiddenInDelete) return null;
                 const keyString = key;
                 assert(typeof keyString === "string", "Key must be a string");
                 return (

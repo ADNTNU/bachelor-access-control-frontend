@@ -1,4 +1,4 @@
-import ResetPasswordForm from "@components/reset-password/ResetPasswordForm";
+import ResetPasswordForm from "@components/resetPassword/ResetPasswordForm";
 import { Container } from "@mui/material";
 
 export default async function ResetPasswordPage({

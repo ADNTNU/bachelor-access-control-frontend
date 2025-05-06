@@ -48,7 +48,7 @@ export default function AdminDialogsProvider<
   const [rowMutator, setRowMutator] = useState<
     KeyedMutator<AdminCrudListResponse<U>> | undefined
   >(undefined);
-  const [commitedChanges, setCommitedChanges] = useState<boolean>(false);
+  const [commitedChanges, setCommitedChanges] = useState<boolean>(true);
 
   const [currentDialog, setCurrentDialog] = useState<string | null>(null);
   const [prevDialog, setPrevDialog] = useState<string | null>(null);

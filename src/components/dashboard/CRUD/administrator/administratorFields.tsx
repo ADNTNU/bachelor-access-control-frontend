@@ -69,6 +69,7 @@ export const administratorDefaultValues: RequireKeys<
   status: "Invited",
   username: "",
   email: "",
+  registered: false,
 };
 
 const administratorFields: DialogFields<AdministratorDialogFields> = {
@@ -112,6 +113,16 @@ const administratorFields: DialogFields<AdministratorDialogFields> = {
     editable: false,
     element: (props) => <DialogGridItem {...props} type="text" />,
   },
+  registered: {
+    key: "registered",
+    label: "Registered",
+    required: false,
+    addable: false,
+    editable: false,
+    hiddenInEdit: true,
+    hiddenInDelete: true,
+    element: (props) => <DialogGridItem {...props} type="text" />,
+  },
   enabled: {
     key: "enabled",
     label: "Enabled",
@@ -135,6 +146,7 @@ export const administratorInviteHandler: DialogSubmitHandler<
     name: _name,
     status: _status,
     username: _username,
+    registered: _registered,
     enabled,
     email,
     ...rest
@@ -214,6 +226,7 @@ export const administratorUpdateHandler: DialogSubmitHandler<
     status: _status,
     username: _username,
     email: _email,
+    registered: _registered,
     ...rest
   } = data;
 

@@ -14,6 +14,9 @@ import { useForm, type SubmitHandler } from "react-hook-form";
 import apiRoutes from "@/apiRoutes";
 import NextLink from "next/link";
 
+export const passwordTip =
+  "Password must be at least 12 characters long, contain at least one uppercase letter, one lowercase letter and one number.";
+
 type FormInput = {
   newPassword: string;
 };
@@ -27,9 +30,6 @@ export default function ResetPasswordForm(props: ResetPasswordFormProps) {
 
   const [genericError, setGenericError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
-
-  const passwordTip =
-    "Password must be at least 12 characters long, contain at least one uppercase letter, one lowercase letter and one number.";
 
   const {
     register,

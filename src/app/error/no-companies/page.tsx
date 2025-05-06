@@ -38,18 +38,29 @@ export default async function NoCompaniesErrorPage() {
           If you have just been invited to a company, you can go to the
           dashboard to start managing access.
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          href={routes.dashboard.index}
-          sx={{ alignSelf: "center", marginTop: 2 }}
-          onClick={async () => {
-            "use server";
-            await revalidateCompaniesCache(session.accessToken!);
-          }}
+        <Stack
+          direction="row"
+          gap={2}
+          justifyContent="center"
+          alignItems="center"
+          sx={{ marginTop: 2 }}
         >
-          Go to Dashboard
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            href={routes.dashboard.index}
+            sx={{ alignSelf: "center" }}
+            onClick={async () => {
+              "use server";
+              await revalidateCompaniesCache(session.accessToken!);
+            }}
+          >
+            Go to Dashboard
+          </Button>
+          <Button variant="outlined" href={routes.auth.signOut()}>
+            Sign out
+          </Button>
+        </Stack>
       </Stack>
     </Container>
   );
