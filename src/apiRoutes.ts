@@ -1,5 +1,7 @@
 const crudAdministratorBase = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/administrator`;
 const crudApiKeyBase = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/api-key`;
+const authBase = `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth`;
+const internalBaseURL = process.env.BACKEND_INTERNAL_URL;
 
 const apiRoutes = {
   crud: {
@@ -15,14 +17,16 @@ const apiRoutes = {
       id: (id: number | string) => `${crudApiKeyBase}/${id}`,
     },
   },
-  company: {
-    all: `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/company/all`,
+  server: {
+    company: {
+      all: `${internalBaseURL}/company/all`,
+    },
   },
   auth: {
-    login: `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/login`,
-    signOut: `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/sign-out`,
-    requestPasswordReset: `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/request-password-reset`,
-    resetPassword: `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/auth/reset-password`,
+    login: `${authBase}/login`,
+    signOut: `${authBase}/sign-out`,
+    requestPasswordReset: `${authBase}/request-password-reset`,
+    resetPassword: `${authBase}/reset-password`,
   },
   administrator: {
     registerFromInvite: `${process.env.NEXT_PUBLIC_BACKEND_BASE_URL}/administrator/register-from-invite`,
