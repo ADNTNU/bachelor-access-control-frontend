@@ -10,6 +10,12 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
 
+    env:
+      AUTH_SECRET: not-important
+      AUTH_TRUST_HOST: true
+      NEXT_PUBLIC_BACKEND_BASE_URL: https://not-important.com
+      BACKEND_INTERNAL_URL: https://not-important.com
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
