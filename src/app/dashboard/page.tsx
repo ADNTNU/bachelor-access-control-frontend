@@ -23,6 +23,7 @@ export default async function DashboardPage() {
   } else if (companiesRes instanceof UnauthorizedError) {
     redirect(routes.error.unauthorized(routes.dashboard.index));
   } else if (companiesRes instanceof Error) {
+    console.error("Error fetching companies:", companiesRes);
     redirect(routes.error.unknown(routes.dashboard.index));
   }
 
