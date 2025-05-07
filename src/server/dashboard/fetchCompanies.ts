@@ -12,8 +12,7 @@ import { createHash } from "crypto";
 import { revalidateTag } from "next/cache";
 
 export async function fetchCompanies(token: string) {
-  // TODO: Add correct API URL
-  const res = await fetch(apiRoutes.company.all, {
+  const res = await fetch(apiRoutes.server.company.all, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
