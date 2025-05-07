@@ -15,6 +15,7 @@ jobs:
       AUTH_TRUST_HOST: true
       NEXT_PUBLIC_BACKEND_BASE_URL: https://not-important.com
       BACKEND_INTERNAL_URL: https://not-important.com
+      NEXTAUTH_URL: https://not-important.com
 
     steps:
       - name: Checkout code

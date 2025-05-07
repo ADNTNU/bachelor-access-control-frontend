@@ -16,6 +16,7 @@ export const env = createEnv({
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
+    NEXTAUTH_URL: z.string().url(),
   },
 
   /**
@@ -38,6 +39,7 @@ export const env = createEnv({
     NODE_ENV: process.env.NODE_ENV,
     BACKEND_INTERNAL_URL: process.env.BACKEND_INTERNAL_URL,
     NEXT_PUBLIC_BACKEND_BASE_URL: process.env.NEXT_PUBLIC_BACKEND_BASE_URL,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
