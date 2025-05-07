@@ -10,7 +10,9 @@ export type AdministratorListDto = {
   id: number;
   enabled: boolean;
   accepted: boolean;
+  registered: boolean;
   username: string;
+  email: string;
   name: string;
 };
 
@@ -19,7 +21,7 @@ export type ListAdministratorResponse =
 
 export type InviteAdministratorRequestBody = {
   companyId: number;
-  username: string;
+  email: string;
   enabled: boolean;
   role: string;
 };

@@ -14,12 +14,13 @@ import {
 import {
   type DefaultValues,
   type FieldValues,
+  type SubmitHandler,
   useForm,
   type UseFormProps,
 } from "react-hook-form";
 import type { WithId } from "@models/utils";
 import assert from "assert";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type DialogFields,
   DialogGridItemWrapper,
@@ -29,6 +30,9 @@ import {
   gridSizingRow,
   type GroupingProps,
 } from "./common";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { routes } from "@/routes";
 
 type AddDialogProps<T extends FieldValues> = {
   fields: DialogFields<T>;
@@ -38,7 +42,7 @@ type AddDialogProps<T extends FieldValues> = {
   useFormProps?: UseFormProps<T>;
   defaultValues: DefaultValues<T>;
   companyId: number;
-  token: string;
+  currentUrl: string;
 };
 
 export default function AddDialog<
@@ -53,8 +57,22 @@ export default function AddDialog<
     useFormProps,
     defaultValues,
     companyId,
-    token,
+    currentUrl,
   } = props;
+
+  const session = useSession();
+
+  const token = useMemo(() => {
+    if (session.status === "authenticated") {
+      return session.data?.accessToken;
+    }
+    return undefined;
+  }, [session]);
+
+  if (!token && session.status !== "loading") {
+    console.warn("No token found, redirecting to unauthorized page");
+    redirect(routes.error.unauthorized(currentUrl));
+  }
 
   const {
     addDialogOpen: open,
@@ -63,6 +81,9 @@ export default function AddDialog<
     error,
     setError: setGlobalError,
     setCommitedChanges,
+    setHasDoneChanges,
+    currentDialog,
+    openAnyDialog,
   } = useAdminDialog<T, U>();
 
   const {
@@ -78,10 +99,52 @@ export default function AddDialog<
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!open) {
+    if (!currentDialog) {
       reset();
     }
-  }, [open, reset]);
+    if (!open) {
+      setGlobalError(null);
+    }
+  }, [currentDialog, open, reset, setGlobalError]);
+
+  const submitHandler: SubmitHandler<T> = useCallback(
+    async (data, event) => {
+      if (!token) {
+        setGlobalError("Authentication data not found");
+        return;
+      }
+
+      if (
+        await onSubmit(
+          data,
+          {
+            setError,
+            setGlobalError,
+            cancelDialog,
+            setLoading,
+            fields,
+            companyId,
+            token,
+            openAnyDialog,
+          },
+          event,
+        )
+      ) {
+        setCommitedChanges(true);
+      }
+    },
+    [
+      token,
+      onSubmit,
+      setError,
+      setGlobalError,
+      cancelDialog,
+      fields,
+      companyId,
+      openAnyDialog,
+      setCommitedChanges,
+    ],
+  );
 
   return (
     <Dialog
@@ -91,25 +154,7 @@ export default function AddDialog<
       fullWidth={Object.keys(fields).length >= 3}
     >
       <form
-        onSubmit={handleSubmit(async (submitData, submitEvent) => {
-          if (
-            await onSubmit(
-              submitData,
-              {
-                setError,
-                setGlobalError,
-                cancelDialog,
-                setLoading,
-                fields,
-                companyId,
-                token,
-              },
-              submitEvent,
-            )
-          ) {
-            setCommitedChanges(true);
-          }
-        })}
+        onSubmit={handleSubmit(submitHandler)}
         style={{
           overflowY: "auto",
           display: "flex",
@@ -145,6 +190,7 @@ export default function AddDialog<
                   {field.element({
                     field,
                     setDialogContent: setAddDialogData,
+                    setHasDoneChanges,
                     register,
                     control,
                     setValue,
@@ -183,6 +229,7 @@ export default function AddDialog<
                               {field.element({
                                 field,
                                 setDialogContent: setAddDialogData,
+                                setHasDoneChanges,
                                 register,
                                 control,
                                 setValue,
@@ -206,10 +253,10 @@ export default function AddDialog<
             }}
             disabled={loading}
           >
-            Avbryt
+            Cancel
           </Button>
           <Button variant="contained" type="submit" disabled={loading}>
-            Lagre
+            Save
           </Button>
         </DialogActions>
       </form>

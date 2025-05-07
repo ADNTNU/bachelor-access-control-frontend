@@ -47,7 +47,10 @@ export default function RootLayout({
       >
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            <SessionProvider>
+            <SessionProvider
+              refetchInterval={300} // 5 minutes
+              refetchOnWindowFocus
+            >
               <InitColorSchemeScript attribute="data-color-scheme" />
               {children}
             </SessionProvider>

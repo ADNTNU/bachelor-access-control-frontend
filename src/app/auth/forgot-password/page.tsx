@@ -1,18 +1,14 @@
-import LoginComponent from "@components/auth/LoginComponent";
+import ForgotPasswordComponent from "@components/auth/ForgotPasswordComponent";
 import { Container } from "@mui/material";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Login",
-  description: "Login to your account",
+  title: "Forgot Password",
+  description: "Reset your password",
 };
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ rd?: string }>;
-}) {
-  const { rd } = await searchParams;
+export default async function ForgotPasswordPage() {
   return (
     <Container
       maxWidth="sm"
@@ -25,7 +21,9 @@ export default async function LoginPage({
         padding: 3,
       }}
     >
-      <LoginComponent onLoginSuccess="redirect" rd={rd} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <ForgotPasswordComponent />
+      </Suspense>
     </Container>
   );
 }

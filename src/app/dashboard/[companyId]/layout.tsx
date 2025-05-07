@@ -6,18 +6,21 @@ import DrawerToggleButton from "@components/dashboard/DashboardDrawerToggleButto
 import DrawerHeader from "@components/dashboard/DashboardDrawerHeader";
 import DashboardAppBar from "@components/dashboard/DashboardAppBar";
 import DashboardDrawerProvider from "@/contexts/DashboardDrawerContext/DashboardDrawerProvider";
-import DashboardDrawer from "@components/dashboard/DashboardDrawer";
+
 import { auth } from "@server/auth";
 import { redirect } from "next/navigation";
 import { fetchCompanies } from "@server/dashboard/fetchCompanies";
 import { routes } from "@/routes";
 import { UnauthenticatedError, UnauthorizedError } from "@/errors";
 import type { CompanySimpleDto } from "@models/dto/company";
+import { Divider } from "@mui/material";
+import CompanySelect from "@components/dashboard/CompanySelect";
+import DashboardDrawerWrapper from "@components/dashboard/DashboardDrawerWrapper";
 
 /**
  * DashboardLayout component that provides a layout for the dashboard pages.
  * It includes a navigation drawer and an app bar.
- * It fetches the user's companies and checks for authentication.
+ * It fetches the administrators's companies and checks for authentication.
  *
  * @param props - The props for the DashboardLayout component.
  * @param props.children - The child components to be rendered inside the layout.
@@ -78,12 +81,20 @@ export default async function DashboardLayout({
             }}
           >
             <DrawerToggleButton />
+            <Box>
+              <CompanySelect
+                companies={companies}
+                selectedCompanyId={companyId}
+                onSelectCompany={"navigate"}
+              />
+            </Box>
+            <Divider orientation="vertical" />
             <Typography variant="h6" noWrap>
               Horizon access control
             </Typography>
           </Toolbar>
         </DashboardAppBar>
-        <DashboardDrawer companyId={companyId} companies={companies} />
+        <DashboardDrawerWrapper companyId={companyId} />
         <Box component="main" sx={{ flexGrow: 1, p: 3, overflow: "auto" }}>
           <DrawerHeader />
           {children}

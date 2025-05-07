@@ -10,10 +10,17 @@ import {
   Grid2,
   Stack,
 } from "@mui/material";
-import { type ReactNode, useEffect, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { type WithId } from "@models/utils";
 import {
   type DefaultValues,
+  type SubmitHandler,
   useForm,
   type UseFormProps,
 } from "react-hook-form";
@@ -28,6 +35,9 @@ import {
   type GroupingProps,
 } from "./common";
 import useAdminDialog from "@/contexts/AdminDialogContext/useAdminDialog";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
+import { routes } from "@/routes";
 
 type EditDialogProps<T extends FieldValuesWithId> = {
   fields: DialogFields<T>;
@@ -38,7 +48,7 @@ type EditDialogProps<T extends FieldValuesWithId> = {
   defaultValues: DefaultValues<T>;
   bottomElement?: ReactNode;
   companyId: number;
-  token: string;
+  currentUrl: string;
 };
 
 export default function EditDialog<
@@ -54,8 +64,22 @@ export default function EditDialog<
     defaultValues,
     bottomElement,
     companyId,
-    token,
+    currentUrl,
   } = props;
+
+  const session = useSession();
+
+  const token = useMemo(() => {
+    if (session.status === "authenticated") {
+      return session.data?.accessToken;
+    }
+    return undefined;
+  }, [session]);
+
+  if (!token && session.status !== "loading") {
+    console.warn("No token found, redirecting to unauthorized page");
+    redirect(routes.error.unauthorized(currentUrl));
+  }
 
   const {
     editDialogOpen: open,
@@ -67,6 +91,9 @@ export default function EditDialog<
     cancelDialog,
     setEditDialogData,
     setCommitedChanges,
+    setHasDoneChanges,
+    currentDialog,
+    openAnyDialog,
   } = useAdminDialog<T, U>();
 
   const [prevData, setPrevData] = useState<T | null>(null);
@@ -81,11 +108,14 @@ export default function EditDialog<
     });
 
   useEffect(() => {
-    if (!open) {
+    if (!currentDialog) {
       reset();
       setLoading(false);
     }
-  }, [open, reset]);
+    if (!open) {
+      setGlobalError(null);
+    }
+  }, [currentDialog, open, reset, setGlobalError]);
 
   useEffect(() => {
     if (prevData === null && dialogData) {
@@ -95,6 +125,45 @@ export default function EditDialog<
     setPrevData(dialogData);
   }, [dialogData, prevData, setDeleteDialogData]);
 
+  const submitHandler: SubmitHandler<T> = useCallback(
+    async (data, event) => {
+      if (!token) {
+        setGlobalError("Authentication data not found");
+        return;
+      }
+
+      if (
+        await onSubmit(
+          data,
+          {
+            setError,
+            setGlobalError,
+            cancelDialog,
+            setLoading,
+            fields,
+            companyId,
+            token,
+            openAnyDialog,
+          },
+          event,
+        )
+      ) {
+        setCommitedChanges(true);
+      }
+    },
+    [
+      cancelDialog,
+      companyId,
+      fields,
+      onSubmit,
+      openAnyDialog,
+      setCommitedChanges,
+      setError,
+      setGlobalError,
+      token,
+    ],
+  );
+
   return (
     <Dialog
       open={open}
@@ -103,25 +172,7 @@ export default function EditDialog<
       fullWidth={Object.keys(fields).length >= 3}
     >
       <form
-        onSubmit={handleSubmit(async (submitData, submitEvent) => {
-          if (
-            await onSubmit(
-              submitData,
-              {
-                setError,
-                setGlobalError,
-                cancelDialog,
-                setLoading,
-                fields,
-                companyId,
-                token,
-              },
-              submitEvent,
-            )
-          ) {
-            setCommitedChanges(true);
-          }
-        })}
+        onSubmit={handleSubmit(submitHandler)}
         style={{
           overflowY: "auto",
           display: "flex",
@@ -160,6 +211,7 @@ export default function EditDialog<
                       isEdit: true,
                     },
                     setDialogContent: setEditDialogData,
+                    setHasDoneChanges,
                     register,
                     control,
                     setValue,
@@ -201,6 +253,7 @@ export default function EditDialog<
                                   isEdit: true,
                                 },
                                 setDialogContent: setEditDialogData,
+                                setHasDoneChanges,
                                 register,
                                 control,
                                 setValue,
@@ -232,17 +285,17 @@ export default function EditDialog<
             disabled={loading}
             sx={{ mr: "auto" }}
           >
-            Slett
+            Delete
           </Button>
           <Button
             variant="outlined"
             onClick={() => cancelDialog()}
             disabled={loading}
           >
-            Avbryt
+            Cancel
           </Button>
           <Button variant="contained" type="submit" disabled={loading}>
-            Lagre
+            Save
           </Button>
         </DialogActions>
       </form>

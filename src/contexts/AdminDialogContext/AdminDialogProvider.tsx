@@ -38,32 +38,86 @@ export default function AdminDialogsProvider<
   const [editDialogData, setEditDialogData] = useState<T | null>(null);
   const [selectedRows, setSelectedRows] = useState<U[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState<boolean>(false);
   const [hasDoneChanges, setHasDoneChanges] = useState<boolean>(false);
-  const [_actionOnConfirm, setActionOnConfirm] = useState<
+  const [actionOnConfirm, setActionOnConfirm] = useState<
     (() => void) | undefined
   >(undefined);
+
   const [rowMutator, setRowMutator] = useState<
     KeyedMutator<AdminCrudListResponse<U>> | undefined
   >(undefined);
-  const [commitedChanges, setCommitedChanges] = useState<boolean>(false);
+  const [commitedChanges, setCommitedChanges] = useState<boolean>(true);
 
-  const [currentDialog, setCurrentDialog] = useState<
-    "add" | "delete" | "edit" | null
-  >(null);
-  const [prevdialog, setPrevDialog] = useState<
-    "add" | "delete" | "edit" | null
-  >(null);
-  const hasMountedRef = useRef<boolean>(false);
+  const [currentDialog, setCurrentDialog] = useState<string | null>(null);
+  const [prevDialog, setPrevDialog] = useState<string | null>(null);
+
+  const [customDialogsOpen, setCustomDialogsOpen] = useState<
+    Record<string, boolean>
+  >({});
+  const [customDialogsData, setCustomDialogsData] = useState<
+    Record<string, object>
+  >({});
+
+  const isMountedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const clearAllCustomDialogsData = useCallback(() => {
+    setCustomDialogsData({});
+  }, [setCustomDialogsData]);
+
+  const closeAllDialogs = useCallback(() => {
+    setAddDialogOpen(false);
+    setEditDialogOpen(false);
+    setDeleteDialogOpen(false);
+    setCustomDialogsOpen({});
+  }, [
+    setAddDialogOpen,
+    setEditDialogOpen,
+    setDeleteDialogOpen,
+    setCustomDialogsOpen,
+  ]);
+
+  const closeCurrentDialog = useCallback(() => {
+    if (currentDialog === "add") {
+      setAddDialogOpen(false);
+    } else if (currentDialog === "edit") {
+      setEditDialogOpen(false);
+    } else if (currentDialog === "delete") {
+      setDeleteDialogOpen(false);
+    } else if (currentDialog) {
+      setCustomDialogsOpen((prev) => ({ ...prev, [currentDialog]: false }));
+    }
+    if (prevDialog) {
+      setCurrentDialog(prevDialog);
+    }
+    setPrevDialog(null);
+  }, [
+    currentDialog,
+    prevDialog,
+    setAddDialogOpen,
+    setEditDialogOpen,
+    setDeleteDialogOpen,
+  ]);
 
   const confirmDiscardChanges = useCallback(
     (action: () => void) => {
       if (hasDoneChanges) {
         setActionOnConfirm(() => action);
+        setConfirmDialogOpen(true);
+        closeAllDialogs();
       } else {
         action();
       }
     },
-    [hasDoneChanges],
+    [closeAllDialogs, hasDoneChanges],
   );
 
   const openDialog = useCallback(
@@ -72,8 +126,8 @@ export default function AdminDialogsProvider<
         confirmDiscardChanges(() => openDialog(dialog, true));
         return;
       }
-      setHasDoneChanges(false);
 
+      setHasDoneChanges(false);
       if (currentDialog) {
         setPrevDialog(currentDialog);
       }
@@ -82,14 +136,17 @@ export default function AdminDialogsProvider<
         setAddDialogOpen(true);
         setEditDialogOpen(false);
         setDeleteDialogOpen(false);
+        setCustomDialogsOpen({});
       } else if (dialog === "edit") {
         setAddDialogOpen(false);
         setEditDialogOpen(true);
         setDeleteDialogOpen(false);
-      } else {
+        setCustomDialogsOpen({});
+      } else if (dialog === "delete") {
         setAddDialogOpen(false);
         setEditDialogOpen(false);
         setDeleteDialogOpen(true);
+        setCustomDialogsOpen({});
       }
     },
     [
@@ -101,6 +158,42 @@ export default function AdminDialogsProvider<
     ],
   );
 
+  const openAnyDialog = useCallback(
+    (dialogName: string, data?: object, force?: boolean) => {
+      if (["add", "edit", "delete"].includes(dialogName)) {
+        openDialog(dialogName as "add" | "edit" | "delete", force);
+        return;
+      }
+
+      if (!force) {
+        confirmDiscardChanges(() => openAnyDialog(dialogName, data, true));
+        return;
+      }
+
+      setHasDoneChanges(false);
+
+      if (currentDialog) {
+        setPrevDialog(currentDialog);
+      }
+      setCurrentDialog(dialogName);
+      closeAllDialogs();
+
+      setCustomDialogsOpen((prev) => ({ ...prev, [dialogName]: true }));
+      if (typeof data === "object") {
+        setCustomDialogsData((prev) => ({ ...prev, [dialogName]: data }));
+      }
+    },
+    [closeAllDialogs, confirmDiscardChanges, currentDialog, openDialog],
+  );
+
+  const closeDialogsAndClearHistory = useCallback(() => {
+    setAddDialogOpen(false);
+    setEditDialogOpen(false);
+    setDeleteDialogOpen(false);
+    setCurrentDialog(null);
+    setPrevDialog(null);
+  }, [setAddDialogOpen, setEditDialogOpen, setDeleteDialogOpen]);
+
   const cancelDialog = useCallback(
     (force?: boolean) => {
       if (!force) {
@@ -110,42 +203,48 @@ export default function AdminDialogsProvider<
 
       setHasDoneChanges(false);
 
-      if (prevdialog) {
-        openDialog(prevdialog);
+      if (prevDialog) {
+        openAnyDialog(prevDialog);
       } else {
-        setAddDialogOpen(false);
-        setEditDialogOpen(false);
-        setDeleteDialogOpen(false);
-        setCurrentDialog(null);
+        closeDialogsAndClearHistory();
       }
       setPrevDialog(null);
     },
     [
-      prevdialog,
+      prevDialog,
       confirmDiscardChanges,
-      openDialog,
-      setAddDialogOpen,
-      setEditDialogOpen,
-      setDeleteDialogOpen,
+      openAnyDialog,
+      closeDialogsAndClearHistory,
     ],
   );
 
-  const closeDialog = useCallback(() => {
-    setAddDialogOpen(false);
-    setEditDialogOpen(false);
-    setDeleteDialogOpen(false);
-    setCurrentDialog(null);
-    setPrevDialog(null);
-  }, [setAddDialogOpen, setEditDialogOpen, setDeleteDialogOpen]);
+  const cancelConfirmDialog = useCallback(() => {
+    setConfirmDialogOpen(false);
+    setActionOnConfirm(undefined);
 
-  const clearStatesOnDialogClose = useCallback(() => {
-    if (
-      hasMountedRef.current &&
-      !addDialogOpen &&
-      !editDialogOpen &&
-      !deleteDialogOpen
-    ) {
+    if (currentDialog === "add") {
+      setAddDialogOpen(true);
+    } else if (currentDialog === "edit") {
+      setEditDialogOpen(true);
+    } else if (currentDialog === "delete") {
+      setDeleteDialogOpen(true);
+    } else if (currentDialog) {
+      setCustomDialogsOpen((prev) => ({ ...prev, [currentDialog]: true }));
+    }
+  }, [currentDialog, setAddDialogOpen, setEditDialogOpen, setDeleteDialogOpen]);
+
+  const confirmConfirmDialog = useCallback(() => {
+    setConfirmDialogOpen(false);
+    if (actionOnConfirm) {
+      actionOnConfirm();
+      setActionOnConfirm(undefined);
+    }
+  }, [setConfirmDialogOpen, actionOnConfirm, setActionOnConfirm]);
+
+  const clearStatesOnAllDialogsClosed = useCallback(() => {
+    if (isMountedRef.current && !currentDialog) {
       setPrevDialog(null);
+      setHasDoneChanges(false);
       if (commitedChanges && typeof rowMutator === "function") {
         void rowMutator();
         setCommitedChanges(false);
@@ -153,18 +252,29 @@ export default function AdminDialogsProvider<
       setAddDialogData(null);
       setEditDialogData(null);
       setDeleteDialogData(null);
+      clearAllCustomDialogsData();
     }
-    setHasDoneChanges(false);
-    hasMountedRef.current = true;
+  }, [clearAllCustomDialogsData, commitedChanges, currentDialog, rowMutator]);
+
+  useEffect(clearStatesOnAllDialogsClosed, [clearStatesOnAllDialogsClosed]);
+
+  useEffect(() => {
+    if (
+      !addDialogOpen &&
+      !editDialogOpen &&
+      !deleteDialogOpen &&
+      !confirmDialogOpen &&
+      !Object.values(customDialogsOpen).some((open) => open)
+    ) {
+      setCurrentDialog(null);
+    }
   }, [
     addDialogOpen,
-    commitedChanges,
-    deleteDialogOpen,
     editDialogOpen,
-    rowMutator,
+    deleteDialogOpen,
+    confirmDialogOpen,
+    customDialogsOpen,
   ]);
-
-  useEffect(clearStatesOnDialogClose, [clearStatesOnDialogClose]);
 
   const adminDialogsValue = {
     addDialogOpen,
@@ -176,18 +286,26 @@ export default function AdminDialogsProvider<
     setEditDialogData,
     deleteDialogData,
     setDeleteDialogData,
+    customDialogsOpen,
+    customDialogsData,
+    setHasDoneChanges,
     selectedRows,
     setSelectedRows,
     error,
     setError,
+    currentDialog,
     openDialog,
+    openAnyDialog,
     cancelDialog,
-    closeDialog,
+    closeCurrentDialog,
     rowMutator,
     setRowMutator,
     rowDataToDialogData: rowDataToDialogData,
     setCommitedChanges,
     commitedChanges,
+    confirmDialogOpen,
+    cancelConfirmDialog,
+    confirmConfirmDialog,
   } satisfies AdminDialogsContextType<T, U>;
 
   return (

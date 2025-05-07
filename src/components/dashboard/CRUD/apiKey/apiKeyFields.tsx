@@ -20,6 +20,12 @@ import type {
   UpdateApiKeyRequestBody,
   DeleteApiKeyRequestBody,
 } from "@models/dto/apiKey";
+import { authenticatedFetch } from "@/utils/fetcher";
+import {
+  CLIENT_ID_SECRET_DIALOG_KEY,
+  isClientIdSecretDialogData,
+  type ClientIdSecretDialogData,
+} from "./ClientIdSecretDialog";
 
 type ApiKeyFieldsOverrides = {
   scopes: string;
@@ -123,8 +129,14 @@ const apiKeyFields: DialogFields<ApiKeyDialogFields> = {
 export const apiKeyCreateHandler: DialogSubmitHandler<
   ApiKeyDialogFields
 > = async (data, props): Promise<boolean> => {
-  const { setGlobalError, cancelDialog, setLoading, companyId, token } =
-    props || {};
+  const {
+    setGlobalError,
+    cancelDialog,
+    setLoading,
+    companyId,
+    token,
+    openAnyDialog,
+  } = props || {};
 
   setLoading(true);
 
@@ -152,44 +164,49 @@ export const apiKeyCreateHandler: DialogSubmitHandler<
     scopes: scopes?.length ? scopes.split(",") : [],
   };
 
-  const res = await fetch(apiRoutes.crud.apiKey.index, {
+  const res = await authenticatedFetch(apiRoutes.crud.apiKey.index, token, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify(POSTbody satisfies CreateApiKeyRequestBody),
   });
+
   if (!res.ok) {
-    // const body = (await res.json()) as ProductPOSTResponse;
-    // const { message, error, errors } = body;
-    // console.error(message, error);
-    // if (errors && (setError || setGlobalError)) {
-    //   Object.keys(errors).forEach((key) => {
-    //     const typedKey = key as keyof typeof errors;
-    //     assert(errors[typedKey]);
-
-    //     if (typedKey === "generic") {
-    //       if (setGlobalError) {
-    //         setGlobalError(JSON.stringify(errors[typedKey]));
-    //       }
-    //       console.error("Global error: ", errors[typedKey]);
-    //       setLoading(false);
-    //       return;
-    //     }
-
-    //     if (setError) {
-    //       setError(typedKey, { type: "manual", message: translatedError });
-    //     }
-    //   });
-    // }
-    if (setGlobalError) {
-      setGlobalError("Failed to create apiKey.");
+    if (res.status === 401) {
+      console.error("Unauthorized request to create apiKey.");
+      if (setGlobalError) {
+        setGlobalError("Authentication error. Please log in again.");
+      }
+    } else if (res.status === 403) {
+      console.error("Forbidden request to create apiKey.");
+      if (setGlobalError) {
+        setGlobalError("You don't have permission to create this apiKey.");
+      }
+    } else if (res.status === 400) {
+      console.error("Bad request to create apiKey.");
+      if (setGlobalError) {
+        setGlobalError("Malformed data in request to create apiKey.");
+      }
+    } else if (setGlobalError) {
+      setGlobalError("Failed to create apiKey. Please try again later.");
     }
+
     setLoading(false);
     return false;
   }
-  cancelDialog();
+
+  const body: unknown = await res.json();
+
+  if (isClientIdSecretDialogData(body)) {
+    openAnyDialog(
+      CLIENT_ID_SECRET_DIALOG_KEY,
+      {
+        clientId: body.clientId,
+        clientSecret: body.clientSecret,
+      } satisfies ClientIdSecretDialogData,
+      true,
+    );
+  } else {
+    cancelDialog(true);
+  }
   setLoading(false);
   return true;
 };
@@ -226,22 +243,36 @@ export const apiKeyUpdateHandler: DialogSubmitHandler<
     scopes: scopes?.length ? scopes.split(",") : [],
   };
 
-  const res = await fetch(apiRoutes.crud.apiKey.id(id), {
+  const res = await authenticatedFetch(apiRoutes.crud.apiKey.id(id), token, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify(updateBody satisfies UpdateApiKeyRequestBody),
   });
+
   if (!res.ok) {
-    if (setGlobalError) {
-      setGlobalError("Failed to update apiKey.");
+    if (res.status === 401) {
+      console.error("Unauthorized request to update apiKey.");
+      if (setGlobalError) {
+        setGlobalError("Authentication error. Please log in again.");
+      }
+    } else if (res.status === 403) {
+      console.error("Forbidden request to update apiKey.");
+      if (setGlobalError) {
+        setGlobalError("You don't have permission to update this apiKey.");
+      }
+    } else if (res.status === 400) {
+      console.error("Bad request to update apiKey.");
+      if (setGlobalError) {
+        setGlobalError("Malformed data in request to update apiKey.");
+      }
+    } else if (setGlobalError) {
+      setGlobalError("Failed to update apiKey. Please try again later.");
     }
+
     setLoading(false);
     return false;
   }
-  cancelDialog();
+
+  cancelDialog(true);
   setLoading(false);
   return true;
 };
@@ -254,23 +285,37 @@ export const apiKeysDeleteHandler: DialogDeleteHandler<
   setGlobalError,
   token,
 }): Promise<boolean> => {
-  const res = await fetch(apiRoutes.crud.apiKey.index, {
+  const res = await authenticatedFetch(apiRoutes.crud.apiKey.index, token, {
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({
       apiKeyIds: identifiers,
       companyId,
     } satisfies DeleteApiKeyRequestBody),
   });
+
   if (!res.ok) {
-    if (setGlobalError) {
-      setGlobalError("Failed to delete apiKey(s).");
+    if (res.status === 401) {
+      console.error("Unauthorized request to delete apiKey(s).");
+      if (setGlobalError) {
+        setGlobalError("Authentication error. Please log in again.");
+      }
+    } else if (res.status === 403) {
+      console.error("Forbidden request to delete apiKey(s).");
+      if (setGlobalError) {
+        setGlobalError("You don't have permission to delete this apiKey(s).");
+      }
+    } else if (res.status === 400) {
+      console.error("Bad request to delete apiKey(s).");
+      if (setGlobalError) {
+        setGlobalError("Malformed data in request to delete apiKey(s).");
+      }
+    } else if (setGlobalError) {
+      setGlobalError("Failed to delete apiKey(s). Please try again later.");
     }
+
     return false;
   }
+
   return true;
 };
 

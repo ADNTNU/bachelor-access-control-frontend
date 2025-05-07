@@ -1,50 +1,44 @@
 "use client";
 
 import { Alert, Box, Link, Stack, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { LoginForm } from "./LoginForm";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { routes } from "@/routes";
+import { useRouter } from "next/navigation";
 
 type LoginComponentProps = {
   onLoginSuccess: "redirect" | (() => void);
+  rd?: string;
 };
 
 export default function LoginComponent(props: LoginComponentProps) {
-  const { onLoginSuccess } = props;
+  const { onLoginSuccess, rd } = props;
 
   const [genericError, setGenericError] = useState<string | null>(null);
-
   const router = useRouter();
-  const rd = useSearchParams().get("rd");
 
   const session = useSession();
 
-  useEffect(() => {
-    if (session.status === "authenticated") {
-      // console.log("Already authenticated, redirecting");
+  const handleLoginSuccess = useCallback(() => {
+    // console.log("Login success, redirecting");
+    if (onLoginSuccess === "redirect") {
       if (rd) {
         const redirectUrl = decodeURIComponent(rd);
         router.replace(redirectUrl);
       } else {
         router.replace(routes.index);
       }
-    }
-  }, [session.status, rd, router]);
-
-  const handleLoginSuccess = () => {
-    // console.log("Login success, redirecting");
-    if (onLoginSuccess === "redirect") {
-      if (rd) {
-        router.replace(rd);
-      } else {
-        router.replace(routes.index);
-      }
     } else {
       onLoginSuccess();
     }
-  };
+  }, [onLoginSuccess, rd, router]);
+
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      handleLoginSuccess();
+    }
+  }, [session.status, handleLoginSuccess]);
 
   return (
     <Stack direction={"column"} spacing={2} width="100%">
@@ -55,8 +49,8 @@ export default function LoginComponent(props: LoginComponentProps) {
         {genericError}
       </Alert>
       <LoginForm
-        onLoginFailure={(error) => setGenericError(error)}
-        onLoginSuccess={handleLoginSuccess}
+        onFailure={(error) => setGenericError(error)}
+        onSuccess={handleLoginSuccess}
       />
       <Box mt={2}>
         <Link href={routes.auth.forgotPassword}>Forgot Password?</Link>

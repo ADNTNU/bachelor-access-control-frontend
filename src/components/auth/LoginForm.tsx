@@ -7,13 +7,13 @@ import { type JSX } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 
 type FormInput = {
-  username: string;
+  usernameOrEmail: string;
   password: string;
 };
 
 type LoginFormProps = {
-  onLoginSuccess: () => void;
-  onLoginFailure: (error: string) => void;
+  onSuccess: () => void;
+  onFailure: (error: string) => void;
 };
 
 /**
@@ -21,7 +21,7 @@ type LoginFormProps = {
  * This component should be used in the login page or in a modal component.
  */
 export function LoginForm(props: LoginFormProps): JSX.Element {
-  const { onLoginSuccess, onLoginFailure } = props;
+  const { onSuccess: onLoginSuccess, onFailure: onLoginFailure } = props;
 
   const {
     register,
@@ -32,7 +32,7 @@ export function LoginForm(props: LoginFormProps): JSX.Element {
   const onSubmit: SubmitHandler<FormInput> = async (data) => {
     const result = await signIn("credentials", {
       redirect: false,
-      username: data.username,
+      usernameOrEmail: data.usernameOrEmail,
       password: data.password,
     });
 
@@ -52,16 +52,18 @@ export function LoginForm(props: LoginFormProps): JSX.Element {
   return (
     <Stack component="form" onSubmit={handleSubmit(onSubmit)} gap={2}>
       <TextField
-        {...register("username", { required: true })}
+        {...register("usernameOrEmail", { required: true })}
         label="Username"
         variant="outlined"
         fullWidth
-        error={!!errors.username}
-        helperText={errors.username ? "Username is required" : ""}
-        aria-invalid={errors.username ? "true" : "false"}
-        aria-errormessage={errors.username ? "username-error" : undefined}
-        id="username"
-        aria-label="username"
+        error={!!errors.usernameOrEmail}
+        helperText={errors.usernameOrEmail ? "Username/Email is required" : ""}
+        aria-invalid={errors.usernameOrEmail ? "true" : "false"}
+        aria-errormessage={
+          errors.usernameOrEmail ? "username-or-email-error" : undefined
+        }
+        id="username-or-email"
+        aria-label="username-or-email"
       />
       <TextField
         {...register("password", { required: true })}
