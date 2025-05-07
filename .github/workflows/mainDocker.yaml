@@ -23,7 +23,7 @@ jobs:
 
       - name: Set unique image tag
         id: unique-image-tag
-        run: echo "::set-output name=tag::prod-web-${{ github.sha }}"
+        run: echo "tag=prod-web-${GITHUB_SHA}" >> $GITHUB_OUTPUT
 
       - name: Build & push Docker image
         uses: docker/build-push-action@v3
@@ -31,6 +31,12 @@ jobs:
           context: .
           push: true
           tags: danielneset/bachelor-access-control-frontend:${{ steps.unique-image-tag.outputs.tag }}
+          build-args: |
+            AUTH_SECRET
+            AUTH_TRUST_HOST
+            NEXT_PUBLIC_BACKEND_BASE_URL
+            BACKEND_INTERNAL_URL
+            NEXTAUTH_URL
         env:
           AUTH_SECRET: ${{ secrets.AC_FRONT_AUTH_SECRET }}
           AUTH_TRUST_HOST: true
