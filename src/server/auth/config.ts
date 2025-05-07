@@ -156,7 +156,6 @@ export const authConfig = {
      * @returns {JWT} - Returns the JWT object with the user and access token.
      */
     async jwt({ token, user }) {
-      console.debug("JWT callback:" /* , { token, user } */);
       // If user just signed in, add user data to the token object
       if (user?.id) {
         token.accessToken = user.accessToken;
@@ -206,7 +205,6 @@ export const authConfig = {
           throw new UnknownResponseError();
         }
 
-        console.log("Refreshed token:", data.token);
         token.accessToken = data.token;
         token.refreshToken = data.refreshToken ?? token.refreshToken; // if backend returns a new refreshToken
         token.expires = getAccessTokenExpiration(data.token) ?? undefined;
@@ -219,7 +217,6 @@ export const authConfig = {
       }
     },
     async session({ session, token }) {
-      console.debug("Session callback:" /* , { session, token } */);
       session.accessToken = token.accessToken;
       if (token.user.id) {
         session.user = {

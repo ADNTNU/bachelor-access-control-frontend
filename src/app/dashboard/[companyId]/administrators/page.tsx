@@ -4,7 +4,7 @@ import { routes } from "@/routes";
 import AdministratorDataGrid from "@components/dashboard/CRUD/administrator/AdministratorDataGrid";
 import AdministratorDialogs from "@components/dashboard/CRUD/administrator/administratorDialogs";
 import { administratorRowDataToDialogData } from "@components/dashboard/CRUD/administrator/administratorRowToDialogData";
-import { PageTitle } from "@components/dashboard/PageTitle";
+import { PageTitle } from "@components/dashboard/layout/PageTitle";
 import PageSection from "@components/layout/PageSection";
 import { auth } from "@server/auth";
 import type { Metadata } from "next";
