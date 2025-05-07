@@ -2,9 +2,9 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { type ReactNode } from "react";
-import DrawerToggleButton from "@components/dashboard/DashboardDrawerToggleButton";
-import DrawerHeader from "@components/dashboard/DashboardDrawerHeader";
-import DashboardAppBar from "@components/dashboard/DashboardAppBar";
+import DrawerToggleButton from "@components/dashboard/layout/DashboardDrawerToggleButton";
+import DrawerHeader from "@components/dashboard/layout/DashboardDrawerHeader";
+import DashboardAppBar from "@components/dashboard/layout/DashboardAppBar";
 import DashboardDrawerProvider from "@/contexts/DashboardDrawerContext/DashboardDrawerProvider";
 
 import { auth } from "@server/auth";
@@ -13,9 +13,10 @@ import { fetchCompanies } from "@server/dashboard/fetchCompanies";
 import { routes } from "@/routes";
 import { UnauthenticatedError, UnauthorizedError } from "@/errors";
 import type { CompanySimpleDto } from "@models/dto/company";
-import { Divider } from "@mui/material";
-import CompanySelect from "@components/dashboard/CompanySelect";
-import DashboardDrawerWrapper from "@components/dashboard/DashboardDrawerWrapper";
+import { Divider, Stack } from "@mui/material";
+import CompanySelect from "@components/dashboard/layout/CompanySelect";
+import DashboardDrawerWrapper from "@components/dashboard/layout/DashboardDrawerWrapper";
+import UserMenu from "@components/dashboard/layout/UserButton";
 
 /**
  * DashboardLayout component that provides a layout for the dashboard pages.
@@ -78,20 +79,31 @@ export default async function DashboardLayout({
             sx={{
               px: 1,
               gap: 2,
+              justifyContent: "space-between",
             }}
           >
-            <DrawerToggleButton />
-            <Box>
-              <CompanySelect
-                companies={companies}
-                selectedCompanyId={companyId}
-                onSelectCompany={"navigate"}
-              />
+            <Stack direction="row" gap={2} alignItems="center">
+              <DrawerToggleButton />
+              <Box>
+                <CompanySelect
+                  companies={companies}
+                  selectedCompanyId={companyId}
+                  onSelectCompany={"navigate"}
+                />
+              </Box>
+              <Divider orientation="vertical" />
+              <Typography variant="h6" noWrap>
+                Horizon access control
+              </Typography>
+            </Stack>
+            <Box
+              height="100%"
+              sx={{
+                aspectRatio: "1 / 1",
+              }}
+            >
+              <UserMenu />
             </Box>
-            <Divider orientation="vertical" />
-            <Typography variant="h6" noWrap>
-              Horizon access control
-            </Typography>
           </Toolbar>
         </DashboardAppBar>
         <DashboardDrawerWrapper companyId={companyId} />

@@ -1,0 +1,36 @@
+name: PR Build
+
+on:
+  pull_request:
+    branches:
+      - main # or your default branch
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    env:
+      AUTH_SECRET: not-important
+      AUTH_TRUST_HOST: true
+      NEXT_PUBLIC_BACKEND_BASE_URL: https://not-important.com
+      BACKEND_INTERNAL_URL: https://not-important.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm" # caches ~/.npm
+
+      - name: Install dependencies
+        run: npm ci # or `yarn install --frozen-lockfile`
+
+      - name: Build Next.js app
+        run: npm run build # runs `next build`
+
+      - name: Run linter
+        run: npm run lint # optional

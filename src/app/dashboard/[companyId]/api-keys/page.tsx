@@ -3,7 +3,7 @@ import { routes } from "@/routes";
 import ApiKeyDataGrid from "@components/dashboard/CRUD/apiKey/ApiKeyDataGrid";
 import ApiKeyDialogs from "@components/dashboard/CRUD/apiKey/apiKeyDialogs";
 import { apiKeyRowDataToDialogData } from "@components/dashboard/CRUD/apiKey/apiKeyRowDataToDialogData";
-import { PageTitle } from "@components/dashboard/PageTitle";
+import { PageTitle } from "@components/dashboard/layout/PageTitle";
 import PageSection from "@components/layout/PageSection";
 import { auth } from "@server/auth";
 import type { Metadata } from "next";
