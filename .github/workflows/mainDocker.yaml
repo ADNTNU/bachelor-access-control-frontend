@@ -31,9 +31,9 @@ jobs:
           context: .
           push: true
           tags: danielneset/bachelor-access-control-frontend:${{ steps.unique-image-tag.outputs.tag }}
-          build-args: |
-            AUTH_SECRET=not-important
-            AUTH_TRUST_HOST=true
-            NEXT_PUBLIC_BACKEND_BASE_URL=https://not-important.com
-            BACKEND_INTERNAL_URL=https://not-important.com
-            NEXTAUTH_URL=https://not-important.com
+        env:
+          AUTH_SECRET: ${{ secrets.AC_FRONT_AUTH_SECRET }}
+          AUTH_TRUST_HOST: true
+          NEXT_PUBLIC_BACKEND_BASE_URL: "https://flightfinder.space"
+          BACKEND_INTERNAL_URL: "http://access-control-backend-service:8080"
+          NEXTAUTH_URL: "https://flightfinder.space"
