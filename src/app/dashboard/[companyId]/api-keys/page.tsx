@@ -30,7 +30,7 @@ export default async function ApiKeysPage({
 
   return (
     <AdminDialogProvider rowDataToDialogData={apiKeyRowDataToDialogData}>
-      <PageSection noPaddingX sx={{ gap: 2 }}>
+      <PageSection noPaddingX sx={{ gap: 2 }} maxWidth="xl">
         <PageTitle title="Api Keys" />
         <ApiKeyDataGrid currentUrl={routes.dashboard.apiKeys(companyId)} />
       </PageSection>

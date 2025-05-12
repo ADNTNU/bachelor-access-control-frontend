@@ -23,17 +23,15 @@ export const columns: TypeSafeColDef<
   {
     field: "id",
     headerName: "ID",
-    flex: 1,
-    minWidth: 100,
-    maxWidth: 100,
+    // flex: 1,
+    minWidth: 75,
     description: "Administrator ID",
   },
   {
     field: "status",
     headerName: "Status",
-    flex: 1,
+    // flex: 1,
     minWidth: 100,
-    maxWidth: 100,
     description: "Status",
     valueGetter: (_, row) => {
       const { accepted, enabled } = row;

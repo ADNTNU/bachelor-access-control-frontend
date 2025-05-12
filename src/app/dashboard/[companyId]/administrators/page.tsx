@@ -37,7 +37,7 @@ export default async function AdministratorsPage({
       <AdminDialogProvider
         rowDataToDialogData={administratorRowDataToDialogData}
       >
-        <PageSection noPaddingX sx={{ gap: 2 }}>
+        <PageSection noPaddingX sx={{ gap: 2 }} maxWidth="xl">
           <PageTitle title="Administrators" />
           <AdministratorDataGrid
             currentUrl={routes.dashboard.administrators(companyId)}

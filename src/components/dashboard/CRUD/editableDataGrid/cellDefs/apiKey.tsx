@@ -18,17 +18,24 @@ export const columns: TypeSafeColDef<
   APIEncode<ApiKeyListDto>,
   AggregateFields
 >[] = [
-  { field: "id", headerName: "ID", flex: 1, description: "ApiKey ID" },
+  {
+    field: "id",
+    headerName: "ID",
+    maxWidth: 150,
+    minWidth: 75,
+    description: "ApiKey ID",
+  },
   {
     field: "enabled",
     headerName: "Enabled",
-    flex: 1,
+    minWidth: 100,
     description: "Enabled",
   },
   {
     field: "name",
     headerName: "Name",
     flex: 1,
+    minWidth: 150,
     description: "Name",
   },
   {
