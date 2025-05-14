@@ -9,6 +9,7 @@ import assert from "assert";
 import {
   type Dispatch,
   type SetStateAction,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -68,7 +69,6 @@ export default function EditableDataGrid<
     setEditDialogData,
     setDeleteDialogData,
     setSelectedRows,
-    selectedRows,
     rowDataToDialogData,
   } = useAdminDialog<P, T>();
 
@@ -81,49 +81,54 @@ export default function EditableDataGrid<
     };
   }, []);
 
-  useEffect(() => {
-    if (!isMountedRef.current) return;
-
-    setSelectedRows(
-      rows?.filter((row) => {
-        let rowId: string | number | undefined;
-        if (rowIdGetter) {
-          rowId = rowIdGetter(row.id);
-        } else {
-          assert(
-            typeof row.id === "string" || typeof row.id === "number",
-            "Row id must be a string or number without rowIdGetter",
-          );
-          rowId = row.id;
-        }
-        if (rowSelectionModel.type === "include") {
-          return rowSelectionModel.ids.has(rowId);
-        } else {
-          return !rowSelectionModel.ids.has(rowId);
-        }
-      }),
-    );
-  }, [rowIdGetter, rowSelectionModel, rows, setSelectedRows]);
-
-  useEffect(() => {
-    if (!isMountedRef.current) return;
-
-    if (selectedRows.length === 1 && selectedRows[0]) {
-      void rowDataToDialogData(selectedRows[0]).then((data) => {
-        if (!isMountedRef.current) return;
-        setEditDialogData(data);
-        setDeleteDialogData(data);
-      });
-    } else {
+  const setDialogDataOnRowSelection = useCallback(
+    async (rows: T[]) => {
       if (!isMountedRef.current) return;
-      setEditDialogData(null);
-      setDeleteDialogData(null);
-    }
+
+      if (rows.length === 1 && rows[0]) {
+        void rowDataToDialogData(rows[0]).then((data) => {
+          if (!isMountedRef.current) return;
+          setEditDialogData(data);
+          setDeleteDialogData(data);
+        });
+      } else {
+        if (!isMountedRef.current) return;
+        setEditDialogData(null);
+        setDeleteDialogData(null);
+      }
+    },
+    [rowDataToDialogData, setDeleteDialogData, setEditDialogData],
+  );
+
+  useEffect(() => {
+    if (!isMountedRef.current) return;
+
+    const tempSelectedRows = rows?.filter((row) => {
+      let rowId: string | number | undefined;
+      if (rowIdGetter) {
+        rowId = rowIdGetter(row.id);
+      } else {
+        assert(
+          typeof row.id === "string" || typeof row.id === "number",
+          "Row id must be a string or number without rowIdGetter",
+        );
+        rowId = row.id;
+      }
+      if (rowSelectionModel.type === "include") {
+        return rowSelectionModel.ids.has(rowId);
+      } else {
+        return !rowSelectionModel.ids.has(rowId);
+      }
+    });
+    void setDialogDataOnRowSelection(tempSelectedRows).then(() => {
+      setSelectedRows(tempSelectedRows);
+    });
   }, [
-    rowDataToDialogData,
-    selectedRows,
-    setDeleteDialogData,
-    setEditDialogData,
+    rowIdGetter,
+    rowSelectionModel,
+    rows,
+    setDialogDataOnRowSelection,
+    setSelectedRows,
   ]);
 
   return (
@@ -133,7 +138,7 @@ export default function EditableDataGrid<
         rows={rows}
         loading={loading}
         checkboxSelection
-        disableRowSelectionOnClick
+        // disableRowSelectionOnClick
         editMode="row"
         disableColumnFilter
         disableColumnSorting

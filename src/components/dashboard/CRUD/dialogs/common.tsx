@@ -244,6 +244,7 @@ export function SimpleFieldInput<T extends FieldValues>(
             <TextField
               multiline
               fullWidth
+              placeholder={field.placeholder}
               error={!!error}
               helperText={error?.message}
               disabled={(isEdit && !editable) ?? isDelete}
@@ -266,6 +267,7 @@ export function SimpleFieldInput<T extends FieldValues>(
           render={({ field: controllerField, fieldState: { error } }) => (
             <TextField
               fullWidth
+              placeholder={field.placeholder}
               error={!!error}
               helperText={error?.message}
               disabled={(isEdit && !editable) ?? isDelete}
@@ -288,6 +290,7 @@ export function SimpleFieldInput<T extends FieldValues>(
           render={({ field: controllerField, fieldState: { error } }) => (
             <TextField
               fullWidth
+              placeholder={field.placeholder}
               error={!!error}
               helperText={error?.message}
               disabled={(isEdit && !editable) ?? isDelete}
@@ -315,6 +318,7 @@ export function SimpleFieldInput<T extends FieldValues>(
               <>
                 <TextField
                   fullWidth
+                  placeholder={field.placeholder}
                   error={!!error}
                   helperText={error?.message}
                   disabled={(isEdit && !editable) ?? isDelete}
@@ -430,6 +434,7 @@ export function SimpleFieldInput<T extends FieldValues>(
           }) => (
             <TextField
               fullWidth
+              placeholder={field.placeholder}
               error={!!error}
               helperText={error?.message}
               disabled={(isEdit && !editable) ?? isDelete}

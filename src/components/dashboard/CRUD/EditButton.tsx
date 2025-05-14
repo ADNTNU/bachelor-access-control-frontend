@@ -22,7 +22,7 @@ export default function EditButton(props: EditButtonProps) {
       disabled={disabled}
       sx={{ width: { xs: "100%", sm: "auto" } }}
     >
-      {label ?? "Edit"}
+      {label ?? "Edit selected"}
     </Button>
   );
 }
