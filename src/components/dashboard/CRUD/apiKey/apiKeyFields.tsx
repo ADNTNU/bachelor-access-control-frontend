@@ -170,20 +170,29 @@ export const apiKeyCreateHandler: DialogSubmitHandler<
   });
 
   if (!res.ok) {
+    const resBody = (await res.json()) as unknown;
     if (res.status === 401) {
-      console.error("Unauthorized request to create apiKey.");
+      console.error(
+        `Unauthorized request to create apiKey. Response: ${JSON.stringify(resBody)}`,
+      );
       if (setGlobalError) {
         setGlobalError("Authentication error. Please log in again.");
       }
     } else if (res.status === 403) {
-      console.error("Forbidden request to create apiKey.");
+      console.error(
+        `Forbidden request to create apiKey. Response: ${JSON.stringify(resBody)}`,
+      );
       if (setGlobalError) {
         setGlobalError("You don't have permission to create this apiKey.");
       }
     } else if (res.status === 400) {
-      console.error("Bad request to create apiKey.");
+      console.error(
+        `Bad request to create apiKey. Response: ${JSON.stringify(resBody)}`,
+      );
       if (setGlobalError) {
-        setGlobalError("Malformed data in request to create apiKey.");
+        setGlobalError(
+          `Malformed data in request to create apiKey. Currently, only the scopes "fishery-activity" and "fishing-facility" are supported.`,
+        );
       }
     } else if (setGlobalError) {
       setGlobalError("Failed to create apiKey. Please try again later.");
@@ -249,20 +258,29 @@ export const apiKeyUpdateHandler: DialogSubmitHandler<
   });
 
   if (!res.ok) {
+    const resBody = (await res.json()) as unknown;
     if (res.status === 401) {
-      console.error("Unauthorized request to update apiKey.");
+      console.error(
+        `Unauthorized request to update apiKey. Response: ${JSON.stringify(resBody)}`,
+      );
       if (setGlobalError) {
         setGlobalError("Authentication error. Please log in again.");
       }
     } else if (res.status === 403) {
-      console.error("Forbidden request to update apiKey.");
+      console.error(
+        `Forbidden request to update apiKey. Response: ${JSON.stringify(resBody)}`,
+      );
       if (setGlobalError) {
         setGlobalError("You don't have permission to update this apiKey.");
       }
     } else if (res.status === 400) {
-      console.error("Bad request to update apiKey.");
+      console.error(
+        `Bad request to update apiKey. Response: ${JSON.stringify(resBody)}`,
+      );
       if (setGlobalError) {
-        setGlobalError("Malformed data in request to update apiKey.");
+        setGlobalError(
+          `Malformed data in request to update apiKey. Currently, only the scopes "fishery-activity" and "fishing-facility" are supported.`,
+        );
       }
     } else if (setGlobalError) {
       setGlobalError("Failed to update apiKey. Please try again later.");
